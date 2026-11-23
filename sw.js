@@ -18,7 +18,7 @@
 
 // ===== Configuration =====
 
-const CACHE_VERSION = "0.6.6"; // keep equal to APP_VERSION in js/main.js
+const CACHE_VERSION = "0.6.7"; // keep equal to APP_VERSION in js/main.js
 const CACHE_NAME = "po-slovensky-" + CACHE_VERSION;
 
 // Every file the app needs to work offline (paths relative to this file).
@@ -39,6 +39,7 @@ const APP_FILES = [
   "js/data/lessons-b1.js",
   "js/data/vocabulary.js",
   "js/data/vocabulary-a1.js",
+  "js/data/vocabulary-a2.js",
   "js/data/verbs.js",
   "js/data/exam-a2.js",
   "js/data/exam-a1.js",
