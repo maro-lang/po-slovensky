@@ -4,7 +4,9 @@
  *
  * How it works:
  *   - On install, it downloads every file listed in APP_FILES into a cache,
- *     plus the card drawings listed in img/openmoji/files.json.
+ *     plus the card drawings listed in img/openmoji/files.json. These
+ *     downloads skip the browser's own HTTP cache (see freshRequest), so a
+ *     new version never mixes in files the browser kept from the old one.
  *   - On each request, it answers from that cache first; if the file is not
  *     there, it asks the network.
  *   - When CACHE_VERSION changes, the old copy is deleted and a new one is
@@ -16,7 +18,7 @@
 
 // ===== Configuration =====
 
-const CACHE_VERSION = "0.6.2"; // keep equal to APP_VERSION in js/main.js
+const CACHE_VERSION = "0.6.3"; // keep equal to APP_VERSION in js/main.js
 const CACHE_NAME = "po-slovensky-" + CACHE_VERSION;
 
 // Every file the app needs to work offline (paths relative to this file).
@@ -66,11 +68,22 @@ const APP_FILES = [
 
 // ===== Install: save the app files =====
 
+/**
+ * A request that always goes to the server and skips the browser's HTTP
+ * cache. Why: GitHub Pages lets the browser keep each file for 10 minutes.
+ * Without this, a new version installed shortly after the old one was
+ * opened would save the browser's old copies of some files (this happened
+ * with version 0.6.2: new sw.js, old main.js and i18n.js).
+ */
+function freshRequest(path) {
+  return new Request(path, { cache: "reload" });
+}
+
 self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function (cache) {
-        return cache.addAll(APP_FILES).then(function () { return cacheCardPictures(cache); });
+        return cache.addAll(APP_FILES.map(freshRequest)).then(function () { return cacheCardPictures(cache); });
       })
       .then(function () { return self.skipWaiting(); }) // use the new version at once
   );
@@ -81,10 +94,10 @@ self.addEventListener("install", function (event) {
  * listed in img/openmoji/files.json (written by herramientas/copy_icons.py).
  */
 function cacheCardPictures(cache) {
-  return fetch("img/openmoji/files.json")
+  return fetch(freshRequest("img/openmoji/files.json"))
     .then(function (response) { return response.json(); })
     .then(function (fileNames) {
-      return cache.addAll(fileNames.map(function (name) { return "img/openmoji/" + name; }));
+      return cache.addAll(fileNames.map(function (name) { return freshRequest("img/openmoji/" + name); }));
     });
 }
 
