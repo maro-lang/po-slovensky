@@ -7,6 +7,7 @@
  *   case:<caseId>        -> the 6 cases of the case workshop (A1)
  *   pron:<sectionId>     -> the 8 pronunciation sections (A1)
  *   verbs:<topicId>      -> the 6 verb topics (A2)
+ *   real:<situationId>   -> the 8 real-life situations in Bratislava (B1)
  * The learner decides when a section is done, with the button
  * "Mark as completed" at the end of each one.
  *
@@ -38,6 +39,7 @@
     AppData.cases.ORDER.forEach(function (caseId) { sections.push({ key: "case:" + caseId, level: "A1" }); });
     AppData.pronunciation.SECTIONS.forEach(function (section) { sections.push({ key: "pron:" + section.id, level: "A1" }); });
     if (AppData.verbs) AppData.verbs.TOPICS.forEach(function (topic) { sections.push({ key: "verbs:" + topic.id, level: "A2" }); });
+    if (AppData.realLife) AppData.realLife.SITUATIONS.forEach(function (situation) { sections.push({ key: "real:" + situation.id, level: "B1" }); });
     return sections;
   }
 

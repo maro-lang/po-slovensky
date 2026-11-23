@@ -4,10 +4,11 @@
  * Addresses (after #/module/exam):
  *   (nothing)              -> how the real exam works and the list of mock tests
  *   test/<id>              -> one test: its four parts, last result of each, total
- *   test/<id>/<partId>     -> one part with its timer: reading, listening, writing, speaking
+ *   test/<id>/<partId>     -> one part with its timer: reading, listening, grammar
+ *                             (B1 only), writing, speaking
  *
  * How each part is scored:
- *   reading, listening -> automatically (right answers / questions)
+ *   reading, listening, grammar -> automatically (right answers / questions)
  *   writing, speaking  -> self-check: the learner compares with the model answer
  *                         and ticks the checklist; percent = ticked / total
  * Results are saved in progress.exams[testId][partId] and the average of the
@@ -26,7 +27,7 @@
 
   // ===== Configuration =====
 
-  const PART_ORDER = ["reading", "listening", "writing", "speaking"];
+  const LEVELS = ["A1", "A2", "B1"]; // order of the groups on the start page
   const MAX_PLAYS = 2; // each recording can be heard twice, as in the real exam
   const POINTS_PER_RIGHT_ANSWER = 10;
   const CHOICE_LETTERS = ["a", "b", "c", "d"];
@@ -61,21 +62,24 @@
     return progress.exams[testId];
   }
 
-  /** Average of the parts done so far: { percent, partsDone } or null. */
-  function testSummary(results) {
-    const done = PART_ORDER.filter(function (partId) { return results[partId]; });
+  /** Average of the parts of a test done so far: { percent, partsDone, partsTotal } or null. */
+  function testSummary(results, test) {
+    const done = test.parts.filter(function (part) { return results[part.id]; });
     if (!done.length) return null;
-    const sum = done.reduce(function (total, partId) { return total + results[partId].percent; }, 0);
-    return { percent: Math.round(sum / done.length), partsDone: done.length };
+    const sum = done.reduce(function (total, part) { return total + results[part.id].percent; }, 0);
+    return { percent: Math.round(sum / done.length), partsDone: done.length, partsTotal: test.parts.length };
   }
 
   /** Saves the result of a part and updates the "last exam" shown to friends. */
-  function savePartResult(context, testId, partId, percent) {
-    const results = testResults(context, testId);
+  function savePartResult(context, test, partId, percent) {
+    const results = testResults(context, test.id);
     results[partId] = { percent: percent, date: new Date().toISOString().slice(0, 10) };
-    const summary = testSummary(results);
+    const summary = testSummary(results, test);
     const progress = context.getData().progress;
-    progress.lastExam = { testId: testId, percent: summary.percent, partsDone: summary.partsDone, date: results[partId].date };
+    progress.lastExam = {
+      testId: test.id, level: test.level, percent: summary.percent,
+      partsDone: summary.partsDone, partsTotal: summary.partsTotal, date: results[partId].date
+    };
     if (progress.friendsSync) progress.friendsSync.pending = true; // the friends' table shows it
     context.saveData();
     AppFriends.syncSoon(context.getData(), context.saveData, true);
@@ -103,19 +107,33 @@
   function startPage(container, context) {
     const parts = AppScreens.parts;
 
-    const testRows = AppData.exams.TESTS.map(function (test) {
-      const summary = testSummary(testResults(context, test.id));
+    /** One row of the list: number, name, parts done and average. */
+    function testRow(test) {
+      const summary = testSummary(testResults(context, test.id), test);
+      const finished = summary && summary.partsDone === summary.partsTotal;
       return el("li", {}, [
         el("button", { className: "list-row", "data-test": test.id, onClick: function () { context.navigate("module/exam/test/" + test.id); } }, [
-          el("span", { className: "chip" + (summary && summary.partsDone === 4 ? " chip--done" : "") }, [String(test.number)]),
+          el("span", { className: "chip" + (finished ? " chip--done" : "") }, [String(test.number)]),
           el("span", { className: "list-row__text" }, [
-            el("span", { className: "list-row__title" }, [t("exam.testTitle", { n: test.number })]),
-            el("span", { className: "list-row__subtitle" }, [summary ? t("exam.partsDone", { done: summary.partsDone }) : t("exam.notStarted")])
+            el("span", { className: "list-row__title" }, [t("exam.testTitle", { level: test.level, n: test.number })]),
+            el("span", { className: "list-row__subtitle" }, [summary ? t("exam.partsDone", { done: summary.partsDone, total: summary.partsTotal }) : t("exam.notStarted")])
           ]),
           summary ? percentBadge(summary.percent) : null,
           el("span", { className: "list-row__chevron" }, [icon("chevronRight")])
         ])
       ]);
+    }
+
+    // One group per level, each with a note on where its format comes from.
+    const groups = [];
+    LEVELS.forEach(function (level) {
+      const tests = AppData.exams.TESTS.filter(function (test) { return test.level === level; });
+      if (!tests.length) return;
+      groups.push(
+        parts.sectionLabel(t("exam.levelTitle", { level: level })),
+        el("p", { className: "muted small exam-level-note" }, [t("exam.format." + level)]),
+        el("ul", { className: "card list" }, tests.map(testRow))
+      );
     });
 
     container.append(
@@ -126,23 +144,22 @@
           el("p", { className: "muted" }, [t("exam.realBody")]),
           el("p", { className: "muted small note-inline" }, [t("exam.passNote", { percent: AppData.exams.PASS_PERCENT })])
         ]),
-        parts.sectionLabel(t("exam.tests")),
-        el("ul", { className: "card list" }, testRows),
+      ].concat(groups, [
         el("p", { className: "muted small note" }, [t("exam.moreSoon")])
-      ]),
+      ])),
       parts.buildBottomNav("home", context)
     );
   }
 
-  // ===== One test: its four parts =====
+  // ===== One test: its parts =====
 
   function testPage(container, context, test) {
     const parts = AppScreens.parts;
     const results = testResults(context, test.id);
-    const summary = testSummary(results);
+    const summary = testSummary(results, test);
 
-    const partRows = PART_ORDER.map(function (partId) {
-      const part = findPart(test, partId);
+    const partRows = test.parts.map(function (part) {
+      const partId = part.id;
       const result = results[partId];
       return el("li", {}, [
         el("button", { className: "list-row", "data-part": partId, onClick: function () { context.navigate("module/exam/test/" + test.id + "/" + partId); } }, [
@@ -159,13 +176,13 @@
     });
 
     const summaryCard = summary ? el("div", { className: "card field exam-summary" }, [
-      el("p", { className: "muted small" }, [t("exam.average", { done: summary.partsDone })]),
+      el("p", { className: "muted small" }, [t("exam.average", { done: summary.partsDone, total: summary.partsTotal })]),
       el("p", { className: "exam-summary__value" }, [percentBadge(summary.percent)]),
       el("p", { className: "muted small" }, [t(summary.percent >= AppData.exams.PASS_PERCENT ? "exam.goodSign" : "exam.keepGoing")])
     ]) : null;
 
     container.append(
-      parts.buildHeader(t("exam.testTitle", { n: test.number }), "module/exam", context),
+      parts.buildHeader(t("exam.testTitle", { level: test.level, n: test.number }), "module/exam", context),
       el("section", { className: "content" }, [
         el("p", { className: "muted" }, [t("exam.testIntro")]),
         summaryCard,
@@ -334,7 +351,7 @@
       transcripts.forEach(function (box) { box.hidden = false; });
 
       const percent = Math.round((right / questions.length) * 100);
-      savePartResult(context, test.id, part.id, percent);
+      savePartResult(context, test, part.id, percent);
       context.recordStudy(right * POINTS_PER_RIGHT_ANSWER, "exam-" + test.id + "-" + part.id, right, questions.length);
 
       handInButton.remove();
@@ -375,7 +392,7 @@
     saveButton.addEventListener("click", function () {
       const ticked = boxes.filter(function (b) { return b.box.checked; }).length;
       const percent = Math.round((ticked / boxes.length) * 100);
-      savePartResult(context, test.id, part.id, percent);
+      savePartResult(context, test, part.id, percent);
       context.recordStudy(ticked * POINTS_PER_RIGHT_ANSWER, "exam-" + test.id + "-" + part.id, ticked, boxes.length);
       boxes.forEach(function (b) { b.box.disabled = true; });
       saveButton.remove();

@@ -184,4 +184,7 @@
 
   window.AppModuleScreens = window.AppModuleScreens || {};
   window.AppModuleScreens.lessons = route;
+
+  // Shared with screens-real.js, whose exercises use the same four types.
+  window.AppLessonQuestions = buildQuestions;
 })();

@@ -13,7 +13,8 @@
  * What a row holds (see the access rules in herramientas/firestore.rules):
  *   nickname, a1 / a2 / b1 (percent of sections completed per level),
  *   todayMinutes + dayId, weekMinutes + weekId (time with the app open),
- *   examPercent + examParts (last mock exam: average and parts done, -1 = none),
+ *   examPercent + examParts + examLevel + examTotal (last mock exam: average,
+ *   parts done, level and number of parts; examPercent -1 = no exam yet),
  *   streak (days in a row), updatedAt (server time).
  *
  * Where the data lives:
@@ -184,6 +185,9 @@
       weekId: weekId(new Date()),
       examPercent: lastExam ? lastExam.percent : -1,
       examParts: lastExam ? lastExam.partsDone : 0,
+      // Results saved by version 0.5.0 have no level or total: they were A2 tests with 4 parts.
+      examLevel: lastExam ? (lastExam.level || "A2") : "",
+      examTotal: lastExam ? (lastExam.partsTotal || 4) : 0,
       streak: currentStreak(data.progress),
       updatedAt: api.serverTimestamp()
     };

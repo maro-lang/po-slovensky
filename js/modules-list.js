@@ -10,7 +10,7 @@
  *
  * Depends on: nothing. When a module is built, its `stage` stays as a
  * record and `ready` becomes true (stage 2: lessons, cases, pronunciation; stage 3: review; stage 4: friends;
- * stage 5: verbs, A2 lessons and the exam).
+ * stage 5: verbs, A2 lessons and the exam; stage 6: B1 lessons, real-life Slovak).
  *
  * The stages follow the plan in caracteristicas-v1.md (one folder up).
  */
@@ -21,7 +21,7 @@
   const ALL = [
     {
       id: "lessons",
-      symbol: "A2",
+      symbol: "B1",
       colorKey: "blue",
       stage: 2,
       ready: true,
@@ -75,21 +75,21 @@
     },
     {
       id: "exam",
-      symbol: "A2",
+      symbol: "B1",
       colorKey: "red",
       stage: 5,
       ready: true,
       title: { es: "Modo examen", en: "Exam mode" },
-      description: { es: "Simulacro A2 con tiempo", en: "Timed A2 mock test" }
+      description: { es: "Simulacros A1, A2 y B1 con tiempo", en: "Timed A1, A2 and B1 mock tests" }
     },
     {
       id: "real",
       symbol: "BA",
       colorKey: "pink",
       stage: 6,
-      ready: false,
+      ready: true,
       title: { es: "Eslovaco real", en: "Real-life Slovak" },
-      description: { es: "Situaciones de Bratislava", en: "Bratislava situations" }
+      description: { es: "Escenas de Bratislava con diálogos", en: "Bratislava scenes with dialogues" }
     }
   ];
 

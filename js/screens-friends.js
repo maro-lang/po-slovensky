@@ -245,8 +245,9 @@
   /** One friend: name, bars per level, study time, exam, streak. */
   function playerCard(row, position, b1HasContent) {
     const values = currentValues(row);
+    // Rows from version 0.5.0 have no level or total: those exams were A2 with 4 parts.
     const exam = row.examPercent >= 0
-      ? t("friends.examResult", { percent: row.examPercent, parts: row.examParts })
+      ? t("friends.examResult", { level: row.examLevel || "A2", percent: row.examPercent, parts: row.examParts, total: row.examTotal || 4 })
       : t("friends.noExam");
 
     return el("li", { className: "player" + (row.isMe ? " player--me" : "") }, [
