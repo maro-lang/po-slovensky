@@ -7,8 +7,11 @@
  *      the matching screen. Using "#" addresses means the phone's back
  *      button works and no server configuration is needed.
  *   3. Registers the service worker (sw.js) so the app works offline.
+ *   4. Sends new points to the friends' leaderboard in the background
+ *      (friends.js), now and whenever the phone gets internet back.
  *
- * Depends on: every other file in js/ (loaded before this one) and sw.js.
+ * Depends on: every other file in js/ (loaded before this one), sw.js and,
+ * for the leaderboard, friends.js (AppFriends).
  */
 
 (function () {
@@ -17,7 +20,7 @@
   // ===== Configuration =====
 
   // Shown in Settings. Keep it equal to CACHE_VERSION in sw.js.
-  const APP_VERSION = "0.3.0";
+  const APP_VERSION = "0.4.0";
 
   // ===== State =====
 
@@ -29,8 +32,16 @@
   /** Merges changes into the settings, saves them and applies the language. */
   function updateSettings(changes) {
     appData.settings = Object.assign({}, appData.settings, changes);
+    // A new nickname must also reach the friends' table.
+    if (changes.nickname !== undefined) appData.progress.friendsSync.pending = true;
     AppStorage.save(appData);
     if (changes.baseLanguage) AppText.setLanguage(changes.baseLanguage);
+    syncLeaderboard();
+  }
+
+  /** Uploads to the friends' table if something changed (silent if offline). */
+  function syncLeaderboard() {
+    AppFriends.syncSoon(appData, function () { AppStorage.save(appData); });
   }
 
   // ===== Progress: points, streak and best scores =====
@@ -74,12 +85,23 @@
     }
     progress.totalPoints += points;
 
+    // Points of the current week, for the friends' table. A new week
+    // starts again from 0.
+    const thisWeek = AppFriends.weekId(new Date());
+    if (progress.weekId !== thisWeek) {
+      progress.weekId = thisWeek;
+      progress.weekPoints = 0;
+    }
+    progress.weekPoints += points;
+    progress.friendsSync.pending = true;
+
     if (resultKey) {
       const previous = progress.results[resultKey];
       const isBetter = !previous || correct / total > previous.correct / previous.total;
       if (isBetter) progress.results[resultKey] = { correct: correct, total: total };
     }
     AppStorage.save(appData);
+    syncLeaderboard();
   }
 
   /** Best score of an exercise, or null if never done. */
@@ -128,7 +150,9 @@
       saveData: function () { AppStorage.save(appData); },
       chooseBaseLanguage: function (languageCode) {
         updateSettings({ baseLanguage: languageCode });
-        navigate("home");
+        // Someone who arrived through a link (e.g. a friend's invitation)
+        // continues to that page; everyone else goes home.
+        if (window.location.hash.length > 2) renderCurrentRoute(); else navigate("home");
       }
     };
   }
@@ -185,6 +209,8 @@
 
   if (appData.settings.baseLanguage) AppText.setLanguage(appData.settings.baseLanguage);
   window.addEventListener("hashchange", renderCurrentRoute);
+  window.addEventListener("online", syncLeaderboard); // internet is back
   renderCurrentRoute();
   registerServiceWorker();
+  syncLeaderboard();
 })();

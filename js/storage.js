@@ -34,7 +34,8 @@
       version: DATA_VERSION,
       settings: {
         baseLanguage: null, // "es" or "en"; null means "not chosen yet"
-        nickname: ""
+        nickname: "",
+        friends: { groupCode: null, level: "A1" } // friends' leaderboard (stage 4)
       },
       progress: {
         totalPoints: 0,
@@ -43,7 +44,10 @@
         results: {}, // best score per exercise, e.g. { "cases-gen": { correct: 4, total: 5 } }
         cards: {}, // spaced-review state per card, e.g. { "food:chlieb": { box: 2, due: "2026-11-25" } }
         newToday: null, // { date, count }: new cards introduced today (daily limit)
-        customDecks: [] // the learner's own decks: [{ id, name, icon, cards: [...] }]
+        customDecks: [], // the learner's own decks: [{ id, name, icon, cards: [...] }]
+        weekPoints: 0, // points earned in the week named by weekId (leaderboard)
+        weekId: null, // ISO week such as "2026-W48"
+        friendsSync: { pending: false, lastPushedTotal: null } // leaderboard uploads
       }
     };
   }

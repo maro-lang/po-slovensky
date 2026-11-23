@@ -16,7 +16,7 @@
 
 // ===== Configuration =====
 
-const CACHE_VERSION = "0.3.0"; // keep equal to APP_VERSION in js/main.js
+const CACHE_VERSION = "0.4.0"; // keep equal to APP_VERSION in js/main.js
 const CACHE_NAME = "po-slovensky-" + CACHE_VERSION;
 
 // Every file the app needs to work offline (paths relative to this file).
@@ -35,12 +35,15 @@ const APP_FILES = [
   "js/data/lessons-a1.js",
   "js/data/vocabulary.js",
   "js/srs.js",
+  "js/friends.js",
+  "js/vendor/firebase-lite.js",
   "js/screens.js",
   "js/quiz.js",
   "js/screens-cases.js",
   "js/screens-pronunciation.js",
   "js/screens-lessons.js",
   "js/screens-review.js",
+  "js/screens-friends.js",
   "js/main.js",
   "icons/icon-192.png",
   "icons/icon-512.png",
@@ -92,7 +95,7 @@ self.addEventListener("activate", function (event) {
 
 self.addEventListener("fetch", function (event) {
   // Only simple downloads of our own files are cached. Anything else
-  // (for example the future Firebase connection) goes straight to the network.
+  // (for example the Firebase leaderboard connection) goes straight to the network.
   const isOwnFile = new URL(event.request.url).origin === self.location.origin;
   if (event.request.method !== "GET" || !isOwnFile) return;
 

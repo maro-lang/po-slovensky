@@ -9,7 +9,7 @@
  *   title / description -> texts in Spanish (es) and English (en)
  *
  * Depends on: nothing. When a module is built, its `stage` stays as a
- * record and `ready` becomes true (stage 2: lessons, cases, pronunciation; stage 3: review).
+ * record and `ready` becomes true (stage 2: lessons, cases, pronunciation; stage 3: review; stage 4: friends).
  *
  * The stages follow the plan in caracteristicas-v1.md (one folder up).
  */
@@ -59,7 +59,7 @@
       symbol: "★",
       colorKey: "amber",
       stage: 4,
-      ready: false,
+      ready: true,
       title: { es: "Progreso y amigos", en: "Progress and friends" },
       description: { es: "Tabla del grupo", en: "Group leaderboard" }
     },

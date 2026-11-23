@@ -576,3 +576,32 @@ input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1p
   .grade--known { background: #0f2e1b; color: #a7f3c0; }
 }
 [hidden] { display: none !important; }
+
+/* ===== 15. Friends' leaderboard (stage 4) ===== */
+
+/* Three joined options (level A1 / A2 / B1). */
+.segmented--three { grid-template-columns: 1fr 1fr 1fr; }
+
+/* Card with the group code, big and easy to dictate. */
+.group-card__code {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  margin: 2px 0 14px;
+  user-select: all; /* one long-press selects the whole code */
+}
+
+.leaderboard .num { text-align: right; font-variant-numeric: tabular-nums; }
+.leaderboard th, .leaderboard td { padding: 10px 12px; }
+.leaderboard__rank { color: var(--text-muted); width: 2.5em; font-variant-numeric: tabular-nums; }
+.leaderboard__name { font-weight: 600; margin-right: 8px; overflow-wrap: anywhere; }
+.leaderboard__level { font-size: 0.7rem; padding: 2px 8px; vertical-align: 1px; }
+.leaderboard__me td { background: var(--accent-soft); }
+.leaderboard__me .leaderboard__name { color: var(--accent); }
+
+/* Blue variant of the notice, for friendly hints. */
+.notice--info { background: var(--accent-soft); color: var(--text); border-color: transparent; margin: 12px 0 0; }
+
+/* Buttons waiting for an answer (e.g. connecting to the leaderboard). */
+.btn:disabled { opacity: 0.6; cursor: default; }
