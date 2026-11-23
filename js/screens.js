@@ -133,7 +133,12 @@
     ]);
   }
 
-  /** Main screen: greeting, a card with two counters and the module list. */
+  /**
+   * Main screen: greeting, a card with two counters (minutes today and
+   * streak), progress bars, phrases of the day and the module list.
+   * The header already says "Ahoj!", so the greeting uses the nickname
+   * ("Ahoj, Mariano!") or, without one, "Vitaj!" (welcome).
+   */
   function home(container, context) {
     const data = context.getData();
     const nickname = data.settings.nickname.trim();
@@ -141,10 +146,12 @@
       ? t("home.greetingWithName", { name: nickname })
       : t("home.greeting");
 
+    // data-live-minutes: main.js updates these numbers every new minute
+    // while the home screen is open (see refreshVisibleMinutes there).
     const statsCard = el("div", { className: "card stats" }, [
       el("div", { className: "stat" }, [
-        el("span", { className: "stat__value" }, [String(data.progress.totalPoints)]),
-        el("span", { className: "stat__label" }, [t("home.points")])
+        el("span", { className: "stat__value", "data-live-minutes": "today" }, [String(AppStudyTime.minutesToday(data))]),
+        el("span", { className: "stat__label" }, [t("home.minutesToday")])
       ]),
       el("div", { className: "stat" }, [
         el("span", { className: "stat__value" }, [String(context.getStreak())]),
@@ -177,8 +184,8 @@
         sectionLabel(t("home.progressTitle")),
         el("div", { className: "card field" }, [
           AppProgress.levelBars(data),
-          el("p", { className: "muted small home-time" }, [t("home.timeLine", {
-            today: AppStudyTime.minutesToday(data), week: AppStudyTime.minutesThisWeek(data)
+          el("p", { className: "muted small home-time", "data-live-minutes": "week" }, [t("home.timeLine", {
+            week: AppStudyTime.minutesThisWeek(data)
           })])
         ]),
         sectionLabel(t("home.phrasesTitle")),

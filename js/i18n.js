@@ -27,9 +27,9 @@
       "onboarding.question": "¿Desde qué idioma quieres aprender eslovaco?",
       "onboarding.hint": "Puedes cambiarlo después en Ajustes.",
 
-      "home.greeting": "Ahoj",
-      "home.greetingWithName": "Ahoj, {name}",
-      "home.points": "Puntos",
+      "home.greeting": "Vitaj!",
+      "home.greetingWithName": "Ahoj, {name}!",
+      "home.minutesToday": "Minutos hoy",
       "home.streak": "Racha",
       "home.days": "días",
       "home.modulesTitle": "Módulos",
@@ -212,7 +212,7 @@
       "progress.completed": "✓ Completada (toca para desmarcar)",
       "progress.soon": "pronto",
       "home.progressTitle": "Tu progreso",
-      "home.timeLine": "Hoy: {today} min con la app · esta semana: {week} min",
+      "home.timeLine": "Esta semana: {week} min con la app",
 
       "verbs.title": "Verbos",
       "verbs.topics": "Temas",
@@ -312,9 +312,9 @@
       "onboarding.question": "Which language do you want to learn Slovak from?",
       "onboarding.hint": "You can change it later in Settings.",
 
-      "home.greeting": "Ahoj",
-      "home.greetingWithName": "Ahoj, {name}",
-      "home.points": "Points",
+      "home.greeting": "Vitaj!",
+      "home.greetingWithName": "Ahoj, {name}!",
+      "home.minutesToday": "Minutes today",
       "home.streak": "Streak",
       "home.days": "days",
       "home.modulesTitle": "Modules",
@@ -497,7 +497,7 @@
       "progress.completed": "✓ Completed (tap to undo)",
       "progress.soon": "soon",
       "home.progressTitle": "Your progress",
-      "home.timeLine": "Today: {today} min in the app · this week: {week} min",
+      "home.timeLine": "This week: {week} min in the app",
 
       "verbs.title": "Verbs",
       "verbs.topics": "Topics",

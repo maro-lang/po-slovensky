@@ -213,9 +213,25 @@
 
   // Count the time with the app open; each new minute may update the table
   // (spaced out to one upload every few minutes).
+  /**
+   * Updates the minute counters of the home screen, if it is open, so the
+   * number grows while the user keeps the app on screen (no full redraw).
+   */
+  function refreshVisibleMinutes() {
+    const todayCounter = document.querySelector('[data-live-minutes="today"]');
+    if (todayCounter) todayCounter.textContent = String(AppStudyTime.minutesToday(appData));
+    const weekLine = document.querySelector('[data-live-minutes="week"]');
+    if (weekLine) weekLine.textContent = AppText.t("home.timeLine", { week: AppStudyTime.minutesThisWeek(appData) });
+  }
+
   AppStudyTime.start(
     function () { return appData; },
     function () { AppStorage.save(appData); },
-    function () { appData.progress.friendsSync.pending = true; syncLeaderboard(false); }
+    // Each new minute: refresh the numbers on screen and queue an upload to the group.
+    function () {
+      refreshVisibleMinutes();
+      appData.progress.friendsSync.pending = true;
+      syncLeaderboard(false);
+    }
   );
 })();
