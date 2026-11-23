@@ -35,7 +35,7 @@
       const best = context.getBestResult("lesson-" + unit.id);
       const subtitle = unit.title[lang()] + (best ? " · " + t("common.bestScore", { correct: best.correct, total: best.total }) : "");
       return el("li", {}, [
-        el("button", { className: "list-row", "data-unit": unit.id, onClick: function () { context.navigate("module/lessons/" + unit.id); } }, [
+        el("button", { className: "list-row" + AppProgress.doneClass(context.getData(), "lesson:" + unit.id), "data-unit": unit.id, onClick: function () { context.navigate("module/lessons/" + unit.id); } }, [
           el("span", { className: "chip" + (best ? " chip--done" : "") }, [String(unit.number)]),
           el("span", { className: "list-row__text" }, [
             el("span", { className: "list-row__title" }, [unit.title.sk]),

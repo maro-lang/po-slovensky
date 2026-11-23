@@ -38,7 +38,7 @@
     const rows = AppData.realLife.SITUATIONS.map(function (situation, index) {
       const done = AppProgress.isCompleted(data, "real:" + situation.id);
       return el("li", {}, [
-        el("button", { className: "list-row", "data-situation": situation.id, onClick: function () { context.navigate("module/real/" + situation.id); } }, [
+        el("button", { className: "list-row" + (done ? " is-done" : ""), "data-situation": situation.id, onClick: function () { context.navigate("module/real/" + situation.id); } }, [
           el("span", { className: "chip" + (done ? " chip--done" : "") }, [String(index + 1)]),
           el("span", { className: "list-row__text" }, [
             el("span", { className: "list-row__title" }, [situation.title.sk]),

@@ -21,7 +21,7 @@
   // ===== Configuration =====
 
   // Shown in Settings. Keep it equal to CACHE_VERSION in sw.js.
-  const APP_VERSION = "0.6.4";
+  const APP_VERSION = "0.6.5";
 
   // ===== State =====
 
@@ -207,6 +207,8 @@
   window.addEventListener("online", function () { syncLeaderboard(true); }); // internet is back
   // When the app leaves the screen, send the latest study time.
   document.addEventListener("visibilitychange", function () { if (document.hidden) syncLeaderboard(true); });
+  // Decks fully reviewed before version 0.6.5 (when decks started to count) get marked now.
+  if (AppProgress.markLearnedDecks(appData)) AppStorage.save(appData);
   renderCurrentRoute();
   registerServiceWorker();
   syncLeaderboard(true);

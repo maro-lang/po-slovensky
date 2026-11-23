@@ -8,13 +8,18 @@
  *   pron:<sectionId>     -> the 8 pronunciation sections (A1)
  *   verbs:<topicId>      -> the 6 verb topics (A2)
  *   real:<situationId>   -> the 8 real-life situations in Bratislava (B1)
+ *   deck:<deckId>        -> the 9 built-in flashcard decks (level in DECK_LEVELS)
  * The learner decides when a section is done, with the button
- * "Mark as completed" at the end of each one.
+ * "Mark as completed" at the end of each one. Decks are also marked
+ * automatically once every card of the deck has been reviewed at least once
+ * (see markLearnedDecks).
  *
  * How to use:
  *   AppProgress.completeButton(context, "lesson:a1-1") -> the toggle button
  *   AppProgress.levelStats(data, "A2")   -> { done, total, percent } (percent null if no sections yet)
  *   AppProgress.levelBars(data)          -> element with one bar per level
+ *   AppProgress.doneClass(data, key)     -> " is-done" if completed (thin outline in lists), else ""
+ *   AppProgress.markLearnedDecks(data)   -> marks fully reviewed decks; returns true if something changed
  *
  * Saved data: progress.completed = { "lesson:a1-1": "2026-11-23", … } (date of completion).
  *
@@ -30,6 +35,13 @@
 
   const LEVELS = ["A1", "A2", "B1"];
 
+  // Level of each built-in flashcard deck: everyday topics are A1,
+  // work, health and paperwork vocabulary is A2.
+  const DECK_LEVELS = {
+    food: "A1", transport: "A1", home: "A1", family: "A1", shopping: "A1", "free-time": "A1",
+    work: "A2", health: "A2", offices: "A2"
+  };
+
   // ===== Sections =====
 
   /** Every section of the app, with the level it belongs to. */
@@ -40,6 +52,9 @@
     AppData.pronunciation.SECTIONS.forEach(function (section) { sections.push({ key: "pron:" + section.id, level: "A1" }); });
     if (AppData.verbs) AppData.verbs.TOPICS.forEach(function (topic) { sections.push({ key: "verbs:" + topic.id, level: "A2" }); });
     if (AppData.realLife) AppData.realLife.SITUATIONS.forEach(function (situation) { sections.push({ key: "real:" + situation.id, level: "B1" }); });
+    AppData.vocabulary.DECKS.forEach(function (deck) {
+      if (DECK_LEVELS[deck.id]) sections.push({ key: "deck:" + deck.id, level: DECK_LEVELS[deck.id] });
+    });
     return sections;
   }
 
@@ -50,6 +65,30 @@
 
   function isCompleted(data, key) {
     return Boolean(completedMap(data)[key]);
+  }
+
+  /** Extra CSS class for a list row or card of a completed section (a thin outline). */
+  function doneClass(data, key) {
+    return isCompleted(data, key) ? " is-done" : "";
+  }
+
+  /**
+   * Marks as completed every built-in deck whose cards have all been reviewed
+   * at least once (each card has a review state). Called at the end of a review
+   * session and once at start-up (so decks reviewed before version 0.6.5 count).
+   * Returns true when it marked something, so the caller can save and sync.
+   */
+  function markLearnedDecks(data) {
+    const completed = completedMap(data);
+    let changed = false;
+    AppData.vocabulary.DECKS.forEach(function (deck) {
+      const key = "deck:" + deck.id;
+      if (completed[key] || !DECK_LEVELS[deck.id]) return;
+      const allReviewed = deck.cards.every(function (card) { return Boolean(data.progress.cards[deck.id + ":" + card.sk]); });
+      if (allReviewed) { completed[key] = AppSRS.today(); changed = true; }
+    });
+    if (changed && data.progress.friendsSync) data.progress.friendsSync.pending = true;
+    return changed;
   }
 
   /** How many sections of a level are done. percent is null when the level has no sections yet. */
@@ -64,8 +103,10 @@
   /**
    * "Mark as completed" button. Tapping it again un-marks the section.
    * Each change is saved and sent to the friends' table.
+   * onChange (optional) is called with true/false after each tap, so a
+   * screen can update the look of the section (for example its outline).
    */
-  function completeButton(context, key) {
+  function completeButton(context, key, onChange) {
     const button = el("button", { type: "button", "data-complete": key });
 
     function draw() {
@@ -83,6 +124,7 @@
       if (data.progress.friendsSync) data.progress.friendsSync.pending = true;
       context.saveData();
       draw();
+      if (onChange) onChange(Boolean(completed[key]));
       AppFriends.syncSoon(data, context.saveData, true);
     });
 
@@ -115,7 +157,10 @@
   window.AppProgress = {
     LEVELS: LEVELS,
     allSections: allSections,
+    DECK_LEVELS: DECK_LEVELS,
     isCompleted: isCompleted,
+    doneClass: doneClass,
+    markLearnedDecks: markLearnedDecks,
     levelStats: levelStats,
     completeButton: completeButton,
     bar: bar,

@@ -203,7 +203,7 @@
       const best = context.getBestResult("verbs-" + topic.id);
       const subtitle = topic.title.sk + (best ? " · " + t("common.bestScore", { correct: best.correct, total: best.total }) : "");
       return el("li", {}, [
-        el("button", { className: "list-row", "data-topic": topic.id, onClick: function () { context.navigate("module/verbs/topic/" + topic.id); } }, [
+        el("button", { className: "list-row" + AppProgress.doneClass(context.getData(), "verbs:" + topic.id), "data-topic": topic.id, onClick: function () { context.navigate("module/verbs/topic/" + topic.id); } }, [
           el("span", { className: "chip" + (best ? " chip--done" : "") }, [String(index + 1)]),
           el("span", { className: "list-row__text" }, [
             el("span", { className: "list-row__title" }, [topic.title[lang()]]),

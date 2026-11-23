@@ -5,7 +5,10 @@
  *   (nothing)          -> today's summary, the topic decks and "My decks"
  *   deck/<id>          -> one deck: its cards; own decks can be edited here
  *   session            -> review session with every deck
- *   session/<deckId>   -> review session with one deck
+ *   session/<deckId>   -> review session with one deck (cards due and new ones)
+ *   session/<deckId>/all -> "review again": every card of the deck, even if none
+ *                         is due. Only "I didn't know it" changes the schedule
+ *                         (the card comes back tomorrow); the rest is free practice.
  *
  * A session shows the Slovak word (with its drawing and audio); the
  * learner thinks of the meaning, reveals it and says how well they knew it.
@@ -78,7 +81,7 @@
 
     const deckRow = function (deck) {
       return el("li", {}, [
-        el("button", { className: "list-row", "data-deck": deck.id, onClick: function () { context.navigate("module/review/deck/" + deck.id); } }, [
+        el("button", { className: "list-row" + (deck.custom ? "" : AppProgress.doneClass(data, "deck:" + deck.id)), "data-deck": deck.id, onClick: function () { context.navigate("module/review/deck/" + deck.id); } }, [
           picture(deck.icon, deck.title ? deck.title.sk : deck.name, "pic--chip"),
           el("span", { className: "list-row__text" }, [
             el("span", { className: "list-row__title" }, [deck.title ? deck.title[lang()] : deck.name]),
@@ -173,14 +176,19 @@
       return row;
     });
 
+    // With cards due or new: the normal spaced review. With nothing pending
+    // (and the deck not empty): "review again" with all its cards.
+    const somethingPending = stats.due + stats.fresh > 0;
     const content = [
       el("p", { className: "muted" }, [statsText(stats)]),
       el("button", {
         className: "btn btn--block",
-        disabled: stats.due + stats.fresh === 0,
-        onClick: function () { context.navigate("module/review/session/" + deck.id); }
-      }, [icon("play"), t("review.reviewDeck")])
+        disabled: deck.cards.length === 0,
+        onClick: function () { context.navigate("module/review/session/" + deck.id + (somethingPending ? "" : "/all")); }
+      }, [icon("play"), somethingPending ? t("review.reviewDeck") : t("review.reviewAgain", { count: deck.cards.length })])
     ];
+    // Built-in decks count for the level bars: they can be marked by hand too.
+    if (!deck.custom) content.push(el("div", { className: "complete-row" }, [AppProgress.completeButton(context, "deck:" + deck.id)]));
 
     if (deck.custom) content.push(parts.sectionLabel(t("review.addCard")), buildAddCardForm(deck, context));
 
@@ -253,11 +261,24 @@
 
   // ===== Review session =====
 
-  function sessionPage(container, context, deckId) {
+  /** Every card of the given decks, in random order (for "review again"). */
+  function allCardsShuffled(decks) {
+    const entries = [];
+    decks.forEach(function (deck) {
+      deck.cards.forEach(function (card) { entries.push({ id: deck.id + ":" + card.sk, deck: deck, card: card }); });
+    });
+    for (let i = entries.length - 1; i > 0; i--) {   // Fisher-Yates shuffle
+      const j = Math.floor(Math.random() * (i + 1));
+      const swap = entries[i]; entries[i] = entries[j]; entries[j] = swap;
+    }
+    return entries;
+  }
+
+  function sessionPage(container, context, deckId, practiceAll) {
     const parts = AppScreens.parts;
     const data = context.getData();
     const decks = deckId ? [findDeck(deckId, context)].filter(Boolean) : AppSRS.allDecks(data);
-    const queue = AppSRS.buildSession(decks, data, Boolean(deckId));
+    const queue = practiceAll ? allCardsShuffled(decks) : AppSRS.buildSession(decks, data, Boolean(deckId));
     const backRoute = deckId ? "module/review/deck/" + deckId : "module/review";
 
     const body = el("section", { className: "content" });
@@ -331,8 +352,12 @@
 
       /** Saves the answer and moves on. "Again" sends the card to the end once. */
       function answer(grade) {
-        AppSRS.grade(entry, grade, context.getData());
-        context.saveData();
+        // In "review again" the schedule is only touched when the learner did
+        // not know the card (it comes back tomorrow); otherwise it is practice.
+        if (!practiceAll || grade === "again") {
+          AppSRS.grade(entry, grade, context.getData());
+          context.saveData();
+        }
         points += POINTS[grade];
         queue.shift();
         if (grade === "again" && !repeated.has(entry.id)) {
@@ -348,6 +373,8 @@
 
     /** End of the session: summary and points. */
     function showEnd() {
+      // A deck whose cards have all been reviewed counts as completed (level bars).
+      AppProgress.markLearnedDecks(context.getData());
       context.recordStudy(points, null, done, totalAtStart);
       body.replaceChildren(el("div", { className: "card quiz__result" }, [
         el("p", { className: "quiz__score" }, [t("review.finished", { count: totalAtStart })]),
@@ -367,7 +394,7 @@
       const deck = findDeck(subParts[1], context);
       if (deck) { deckPage(container, context, deck); return; }
     } else if (page === "session") {
-      sessionPage(container, context, subParts[1]);
+      sessionPage(container, context, subParts[1], subParts[2] === "all");
       return;
     }
     startPage(container, context);

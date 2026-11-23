@@ -59,10 +59,14 @@
     ]);
   }
 
-  /** A tappable row of a list (title, subtitle, chevron). */
-  function linkRow(leftPart, title, subtitle, route, context) {
+  /**
+   * A tappable row of a list (title, subtitle, chevron).
+   * doneKey (optional): progress section of the row; if completed, the row gets a thin outline.
+   */
+  function linkRow(leftPart, title, subtitle, route, context, doneKey) {
+    const doneClass = doneKey ? AppProgress.doneClass(context.getData(), doneKey) : "";
     return el("li", {}, [
-      el("button", { className: "list-row", onClick: function () { context.navigate(route); } }, [
+      el("button", { className: "list-row" + doneClass, onClick: function () { context.navigate(route); } }, [
         leftPart,
         el("span", { className: "list-row__text" }, [
           el("span", { className: "list-row__title" }, [title]),
@@ -80,7 +84,7 @@
 
     const caseRows = DATA.ORDER.map(function (caseId) {
       const info = DATA.CASES[caseId];
-      return linkRow(caseBadge(caseId), info.name[lang()] + " · " + info.sk, info.questions.sk, "module/cases/case/" + caseId, context);
+      return linkRow(caseBadge(caseId), info.name[lang()] + " · " + info.sk, info.questions.sk, "module/cases/case/" + caseId, context, "case:" + caseId);
     });
 
     const best = context.getBestResult("cases-all");

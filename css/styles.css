@@ -199,6 +199,14 @@ p { margin: 0; }
   cursor: pointer;
 }
 .list-row:active { background: var(--surface-muted); }
+
+/* Completed sections: a thin outline (white in dark mode, app blue in light
+   mode, where white would not show on the white cards). Inset shadow, so
+   the layout does not move. */
+:root { --done-outline: var(--accent); }
+@media (prefers-color-scheme: dark) { :root { --done-outline: #ffffff; } }
+.list-row.is-done { box-shadow: inset 0 0 0 1px var(--done-outline); border-radius: 12px; }
+.card.is-done { border-color: var(--done-outline); }
 .list-row__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .list-row__title { font-weight: 600; }
 .list-row__subtitle { font-size: 0.875rem; color: var(--text-muted); }

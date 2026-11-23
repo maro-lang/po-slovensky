@@ -9,7 +9,8 @@
  *   - "Hard"          -> stays in its box; comes back after half the interval.
  *   - "I didn't know" -> back to box 1; comes back later in the same session
  *                        and again tomorrow.
- *   - At most NEW_CARDS_PER_DAY new cards are introduced each day.
+ *   - At most NEW_CARDS_PER_DAY new cards are introduced each day in the
+ *     general review; a single deck opened on purpose offers all its new cards.
  *
  * How to use:
  *   AppSRS.allDecks(data)                 -> built-in decks + the learner's own
@@ -92,9 +93,10 @@
   /**
    * Cards to review now: every due card of the given decks, then new cards
    * up to today's limit. Each entry is { id, deck, card }.
-   * `oneDeck` = true when the learner opened a single deck: then up to
-   * NEW_CARDS_PER_DAY new cards of that deck are offered even if the daily
-   * limit was already used elsewhere (they chose to study that deck).
+   * `oneDeck` = true when the learner opened a single deck: then ALL its new
+   * cards are offered, even if the daily limit was already used elsewhere
+   * (they chose to study that deck, and finishing it in one go is what marks
+   * the deck as completed for the level bars; decks have 12 cards).
    */
   function buildSession(decks, data, oneDeck) {
     const now = today();
@@ -110,7 +112,7 @@
       });
     });
 
-    const newLimit = oneDeck ? NEW_CARDS_PER_DAY : newCardsLeftToday(data);
+    const newLimit = oneDeck ? fresh.length : newCardsLeftToday(data);
     return due.concat(fresh.slice(0, newLimit));
   }
 

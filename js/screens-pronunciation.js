@@ -52,11 +52,16 @@
     const sections = [];
     AppData.pronunciation.SECTIONS.forEach(function (section) {
       sections.push(parts.sectionLabel(section.title[language]));
-      sections.push(el("div", { className: "card" }, [
+      const key = "pron:" + section.id;
+      const card = el("div", { className: "card" + AppProgress.doneClass(context.getData(), key) });
+      // The outline appears or disappears as soon as the button is tapped.
+      const button = AppProgress.completeButton(context, key, function (done) { card.classList.toggle("is-done", done); });
+      card.append(
         el("p", { className: "field rule" }, [section.rule[language]]),
         el("ul", { className: "list list--inset" }, section.words.map(wordRow)),
-        el("div", { className: "field complete-row" }, [AppProgress.completeButton(context, "pron:" + section.id)])
-      ]));
+        el("div", { className: "field complete-row" }, [button])
+      );
+      sections.push(card);
     });
 
     container.append(
