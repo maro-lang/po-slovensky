@@ -35,7 +35,7 @@
       settings: {
         baseLanguage: null, // "es" or "en"; null means "not chosen yet"
         nickname: "",
-        friends: { groupCode: null, level: "A1" } // friends' leaderboard (stage 4)
+        friends: { groupCode: null } // friends' group (stage 4)
       },
       progress: {
         totalPoints: 0,
@@ -45,9 +45,11 @@
         cards: {}, // spaced-review state per card, e.g. { "food:chlieb": { box: 2, due: "2026-11-25" } }
         newToday: null, // { date, count }: new cards introduced today (daily limit)
         customDecks: [], // the learner's own decks: [{ id, name, icon, cards: [...] }]
-        weekPoints: 0, // points earned in the week named by weekId (leaderboard)
-        weekId: null, // ISO week such as "2026-W48"
-        friendsSync: { pending: false, lastPushedTotal: null } // leaderboard uploads
+        friendsSync: { pending: false }, // true when the friends' table needs an upload
+        completed: {}, // sections marked as completed: { "lesson:a1-1": "2026-11-23" }
+        studySeconds: {}, // seconds with the app open per day: { "2026-11-23": 1520 }
+        exams: {}, // mock exam results: { "a2-1": { reading: { percent, date }, …, writingTexts: [] } }
+        lastExam: null // { testId, percent, partsDone, date }: shown to friends
       }
     };
   }

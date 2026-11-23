@@ -605,3 +605,184 @@ input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1p
 
 /* Buttons waiting for an answer (e.g. connecting to the leaderboard). */
 .btn:disabled { opacity: 0.6; cursor: default; }
+
+/* ===== 16. Verbs (stage 5) ===== */
+
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.list-row--compact { padding: 10px 16px; }
+.list-row--compact .pill { flex: none; }
+
+/* Head of a verb page: infinitive, meaning, pills, aspect partner. */
+.verb-head__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.verb-head .sk-text { margin-top: 0; }
+.partner-btn { margin-top: 14px; width: 100%; justify-content: space-between; }
+
+/* Conjugation tables: person | form | speaker. */
+.conjugation tr { cursor: pointer; }
+.conjugation__person { width: 5.5em; }
+.conjugation__speak { width: 48px; padding-right: 10px; }
+.conjugation .speak-btn { width: 32px; height: 32px; }
+.conjugation .speak-btn .icon { width: 17px; height: 17px; }
+
+/* ===== 17. Exam mode (stage 5) ===== */
+
+/* Countdown bar under the header; stays visible while scrolling. */
+.exam-timer {
+  position: sticky;
+  top: 54px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 16px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.exam-timer .icon { width: 18px; height: 18px; }
+.exam-timer--warning { background: #fff1d6; color: #8a5300; }
+.exam-timer--over { background: #fdecec; color: #b42318; }
+.exam-timer--stopped { opacity: 0.6; }
+@media (prefers-color-scheme: dark) {
+  .exam-timer--warning { background: #33270c; color: #f3d68e; }
+  .exam-timer--over { background: #3a1414; color: #fecaca; }
+}
+
+.exam-part { padding-top: 12px; }
+.exam-instruction { font-weight: 600; margin: 24px 4px 10px; }
+.exam-part > .exam-instruction:first-child { margin-top: 8px; }
+.exam-text p + p { margin-top: 8px; }
+.exam-text { line-height: 1.6; }
+.exam-item { margin-top: 10px; }
+.exam-notice { padding: 10px 12px; border: 1px dashed var(--border); border-radius: 10px; margin-bottom: 12px; font-weight: 500; }
+.exam-question { font-weight: 600; margin: 4px 0 10px; }
+.exam-options { display: grid; gap: 8px; }
+.exam-options--two { grid-template-columns: 1fr 1fr; }
+.option--chosen { border-color: var(--accent); background: var(--accent-soft); }
+.exam-play { margin-bottom: 10px; }
+.exam-transcript { margin-top: 10px; font-size: 0.9rem; line-height: 1.5; }
+.exam-transcript p + p { margin-top: 4px; }
+
+.exam-textarea {
+  width: 100%;
+  font: inherit;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg);
+  color: var(--text);
+  resize: vertical;
+}
+.exam-textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.exam-counter { margin-top: 6px; }
+.exam-counter--off { color: #b42318; }
+
+.exam-model { margin-top: 12px; }
+.exam-model__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.exam-model p { margin-top: 4px; }
+.exam-reveal { margin-top: 12px; width: 100%; }
+.exam-talk { margin: 12px 0 0; width: 100%; }
+.exam-prompts { margin: 8px 0 0; padding-left: 20px; }
+.exam-prompts li + li { margin-top: 4px; }
+.link-btn { border: none; background: none; color: var(--accent); font: inherit; font-size: 0.875rem; padding: 4px 0; cursor: pointer; }
+
+.check-list { margin-top: 12px; display: grid; gap: 10px; }
+.check-row { display: flex; gap: 10px; align-items: flex-start; font-size: 0.95rem; }
+.check-row input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); flex: none; }
+
+/* Percent badge: green when at or above the guide mark, amber below. */
+.score-badge { font-weight: 700; font-size: 0.85rem; padding: 3px 10px; border-radius: 999px; flex: none; }
+.score-badge--pass { background: #e9f8ee; color: #14532d; }
+.score-badge--fail { background: #fff1d6; color: #8a5300; }
+@media (prefers-color-scheme: dark) {
+  .score-badge--pass { background: #0f2e1b; color: #a7f3c0; }
+  .score-badge--fail { background: #33270c; color: #f3d68e; }
+}
+.exam-summary { text-align: center; margin-top: 16px; }
+.exam-summary__value { margin: 8px 0; font-size: 1.4rem; }
+.exam-summary__value .score-badge { font-size: 1.2rem; padding: 6px 16px; }
+.note-inline { margin-top: 10px; }
+
+/* Wrap "on / ona" in the conjugation tables less often. */
+.conjugation__person { white-space: nowrap; }
+
+/* ===== 18. Progress bars, completed sections, friends and chat ===== */
+
+/* "Mark as completed" button; green when the section is done. */
+.complete-btn { margin-top: 12px; }
+.complete-btn--done { background: #e9f8ee; color: #14532d; border-color: #b7e4c7; }
+@media (prefers-color-scheme: dark) {
+  .complete-btn--done { background: #0f2e1b; color: #a7f3c0; border-color: #1f5133; }
+}
+.complete-row { padding-top: 4px; }
+.complete-row .complete-btn { margin-top: 0; padding: 10px 14px; }
+
+/* One bar per level: label | track | value. */
+.level-bars { display: grid; gap: 10px; }
+.level-bar { display: grid; grid-template-columns: 2.2em 1fr auto; align-items: center; gap: 10px; }
+.level-bar__label { font-weight: 700; font-size: 0.85rem; }
+.level-bar__track { height: 10px; border-radius: 5px; background: var(--surface-muted); overflow: hidden; }
+.level-bar__fill { height: 100%; border-radius: 5px; background: var(--accent); transition: width 0.4s; }
+.level-bar__value { font-size: 0.8rem; color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 4.5em; text-align: right; }
+.level-bar--empty .level-bar__label { color: var(--text-muted); }
+.level-bars--compact { gap: 6px; margin-top: 10px; }
+.level-bars--compact .level-bar__track { height: 7px; }
+.home-time { margin-top: 12px; }
+
+/* Friends: one card row per person. */
+.players > li { padding: 14px 16px; }
+.player--me { background: var(--accent-soft); }
+.player__head { display: flex; align-items: center; gap: 10px; }
+.player__rank { color: var(--text-muted); font-variant-numeric: tabular-nums; width: 1.2em; }
+.player__name { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.player--me .player__name { color: var(--accent); }
+.player__facts { margin-top: 8px; }
+.chat-open { margin-top: 12px; }
+
+/* Chat: bubbles, own messages on the right; writing box fixed at the bottom. */
+.chat { padding-bottom: 96px; }
+.chat__messages { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.chat__empty { text-align: center; padding: 24px 0; }
+.chat__bubble {
+  align-self: flex-start;
+  max-width: 82%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px 16px 16px 4px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+}
+.chat__bubble--mine { align-self: flex-end; background: var(--accent); border-color: var(--accent); color: var(--accent-text); border-radius: 16px 16px 4px 16px; }
+.chat__author { font-size: 0.75rem; font-weight: 700; color: var(--accent); }
+.chat__text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.chat__time { font-size: 0.7rem; opacity: 0.7; align-self: flex-end; }
+.chat__bubble--mine .chat__delete { color: inherit; opacity: 0.85; align-self: flex-end; font-size: 0.75rem; padding: 2px 0 0; }
+.chat__form {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.chat__input {
+  flex: 1;
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg);
+  color: var(--text);
+  resize: none;
+  max-height: 120px;
+}
+.chat__input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.chat__send { border-radius: 50%; width: 44px; height: 44px; padding: 0; flex: none; }

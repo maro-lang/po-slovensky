@@ -158,7 +158,8 @@
           className: "btn btn--block",
           onClick: function () { context.navigate("module/cases/practice/" + caseId); }
         }, [icon("play"), t("cases.practiceThis", { name: info.name[lang()].toLowerCase() })]),
-        best ? el("p", { className: "muted small center" }, [t("common.bestScore", { correct: best.correct, total: best.total })]) : null
+        best ? el("p", { className: "muted small center" }, [t("common.bestScore", { correct: best.correct, total: best.total })]) : null,
+        AppProgress.completeButton(context, "case:" + caseId)
       ]),
       parts.buildBottomNav("home", context)
     );

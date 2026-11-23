@@ -7,8 +7,9 @@
  *      the matching screen. Using "#" addresses means the phone's back
  *      button works and no server configuration is needed.
  *   3. Registers the service worker (sw.js) so the app works offline.
- *   4. Sends new points to the friends' leaderboard in the background
- *      (friends.js), now and whenever the phone gets internet back.
+ *   4. Counts the time with the app open (study-time.js) and keeps the
+ *      friends' table up to date in the background (friends.js): at start,
+ *      when internet comes back and when the app leaves the screen.
  *
  * Depends on: every other file in js/ (loaded before this one), sw.js and,
  * for the leaderboard, friends.js (AppFriends).
@@ -20,7 +21,7 @@
   // ===== Configuration =====
 
   // Shown in Settings. Keep it equal to CACHE_VERSION in sw.js.
-  const APP_VERSION = "0.4.0";
+  const APP_VERSION = "0.5.0";
 
   // ===== State =====
 
@@ -36,12 +37,15 @@
     if (changes.nickname !== undefined) appData.progress.friendsSync.pending = true;
     AppStorage.save(appData);
     if (changes.baseLanguage) AppText.setLanguage(changes.baseLanguage);
-    syncLeaderboard();
+    syncLeaderboard(true);
   }
 
-  /** Uploads to the friends' table if something changed (silent if offline). */
-  function syncLeaderboard() {
-    AppFriends.syncSoon(appData, function () { AppStorage.save(appData); });
+  /**
+   * Uploads to the friends' table if something changed (silent if offline).
+   * Without `force`, uploads are spaced out (see friends.js).
+   */
+  function syncLeaderboard(force) {
+    AppFriends.syncSoon(appData, function () { AppStorage.save(appData); }, force === true);
   }
 
   // ===== Progress: points, streak and best scores =====
@@ -84,16 +88,7 @@
       progress.lastStudyDate = today;
     }
     progress.totalPoints += points;
-
-    // Points of the current week, for the friends' table. A new week
-    // starts again from 0.
-    const thisWeek = AppFriends.weekId(new Date());
-    if (progress.weekId !== thisWeek) {
-      progress.weekId = thisWeek;
-      progress.weekPoints = 0;
-    }
-    progress.weekPoints += points;
-    progress.friendsSync.pending = true;
+    progress.friendsSync.pending = true; // the streak may have changed
 
     if (resultKey) {
       const previous = progress.results[resultKey];
@@ -101,7 +96,7 @@
       if (isBetter) progress.results[resultKey] = { correct: correct, total: total };
     }
     AppStorage.save(appData);
-    syncLeaderboard();
+    syncLeaderboard(true);
   }
 
   /** Best score of an exercise, or null if never done. */
@@ -209,8 +204,18 @@
 
   if (appData.settings.baseLanguage) AppText.setLanguage(appData.settings.baseLanguage);
   window.addEventListener("hashchange", renderCurrentRoute);
-  window.addEventListener("online", syncLeaderboard); // internet is back
+  window.addEventListener("online", function () { syncLeaderboard(true); }); // internet is back
+  // When the app leaves the screen, send the latest study time.
+  document.addEventListener("visibilitychange", function () { if (document.hidden) syncLeaderboard(true); });
   renderCurrentRoute();
   registerServiceWorker();
-  syncLeaderboard();
+  syncLeaderboard(true);
+
+  // Count the time with the app open; each new minute may update the table
+  // (spaced out to one upload every few minutes).
+  AppStudyTime.start(
+    function () { return appData; },
+    function () { AppStorage.save(appData); },
+    function () { appData.progress.friendsSync.pending = true; syncLeaderboard(false); }
+  );
 })();

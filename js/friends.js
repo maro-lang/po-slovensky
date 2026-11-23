@@ -1,33 +1,44 @@
 /*
- * friends.js — Connection with Firebase for the friends' leaderboard.
+ * friends.js — Connection with Firebase for the friends' group: the progress
+ * table and the group chat.
  *
  * What it does:
  *   - Loads the Firebase code (js/vendor/firebase-lite.js) only when needed,
  *     so the rest of the app stays fast and works offline.
  *   - Signs the phone in anonymously (no e-mail, no password). Firebase
  *     remembers the anonymous identity on the phone.
- *   - Uploads this learner's row (nickname, level, points, streak) and
- *     downloads the rows of the whole group.
+ *   - Uploads this learner's row and downloads the rows of the whole group.
+ *   - Sends, lists and deletes chat messages of the group.
  *
- * Where the data lives (see the access rules in herramientas/firestore.rules):
- *   groups/{groupCode}/players/{userId}
- * The group code works like a shared key: whoever knows it sees the table.
+ * What a row holds (see the access rules in herramientas/firestore.rules):
+ *   nickname, a1 / a2 / b1 (percent of sections completed per level),
+ *   todayMinutes + dayId, weekMinutes + weekId (time with the app open),
+ *   examPercent + examParts (last mock exam: average and parts done, -1 = none),
+ *   streak (days in a row), updatedAt (server time).
+ *
+ * Where the data lives:
+ *   groups/{groupCode}/players/{userId}     one row per learner
+ *   groups/{groupCode}/messages/{messageId} chat messages
+ * The group code works like a shared key: whoever knows it can join.
  *
  * How to use:
- *   AppFriends.newGroupCode()           -> e.g. "AHOJ-K7QM-3XPD"
- *   AppFriends.normalizeCode(text)      -> cleans a code typed by a person
- *   AppFriends.upload(data)             -> Promise; sends this learner's row
- *   AppFriends.fetchTable(code)         -> Promise of the group's rows
- *   AppFriends.leave(code)              -> Promise; deletes this learner's row
- *   AppFriends.syncSoon(data, save)     -> uploads in the background if needed
- *   AppFriends.weekId(date)             -> ISO week such as "2026-W48"
+ *   AppFriends.newGroupCode()              -> e.g. "AHOJ-K7QM-3XPD"
+ *   AppFriends.normalizeCode(text)         -> cleans a code typed by a person
+ *   AppFriends.upload(data)                -> Promise; sends this learner's row
+ *   AppFriends.fetchTable(code)            -> Promise of the group's rows
+ *   AppFriends.leave(code)                 -> Promise; deletes this learner's row
+ *   AppFriends.syncSoon(data, save, force) -> uploads in the background if needed
+ *   AppFriends.fetchMessages(code)         -> Promise of the last messages, oldest first
+ *   AppFriends.sendMessage(code, nickname, text) -> Promise
+ *   AppFriends.deleteMessage(code, id)     -> Promise
+ *   AppFriends.weekId(date)                -> ISO week such as "2026-W48"
  *
- * Saved data used (see storage.js):
- *   settings.friends = { groupCode, level }
- *   progress.weekPoints / progress.weekId  -> points of the current week
- *   progress.friendsSync = { pending, lastPushedTotal }
+ * Saved data used (see storage.js): settings.friends.groupCode,
+ * progress.friendsSync.pending, plus what AppProgress, AppStudyTime and the
+ * exam store.
  *
- * Depends on: js/vendor/firebase-lite.js (loaded on demand).
+ * Depends on: js/vendor/firebase-lite.js (loaded on demand); progress.js and
+ * study-time.js (only when uploading).
  */
 
 (function () {
@@ -37,7 +48,8 @@
 
   // Public settings of the Firebase project "po-slovensky". These values are
   // meant to be inside the app (they identify the project, they are not a
-  // password); the data is protected by the access rules.
+  // password); the data is protected by the access rules, and the key only
+  // works from the app's own web addresses.
   const FIREBASE_CONFIG = {
     apiKey: "AIzaSyAkMIvkmRrJD08JQPAAt9QN3vKbYvBzeIQ",
     authDomain: "po-slovensky.firebaseapp.com",
@@ -49,8 +61,12 @@
 
   const SDK_URL = "js/vendor/firebase-lite.js";
 
-  // The access rules accept at most this many new points per upload.
-  const MAX_POINTS_PER_UPLOAD = 2000;
+  // Background uploads (study time ticking) happen at most this often;
+  // changes the learner makes on purpose are sent at once ("force").
+  const BACKGROUND_UPLOAD_MS = 5 * 60 * 1000;
+
+  const MESSAGES_SHOWN = 50; // last messages loaded in the chat
+  const MAX_MESSAGE_LENGTH = 500; // same limit as the access rules
 
   // Letters and digits that cannot be confused when read aloud (no 0/O, 1/I/L).
   const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -59,6 +75,7 @@
 
   let connection = null; // Promise of { api, db, uid } once connected
   let uploadInProgress = null; // Promise of the upload running right now, if any
+  let lastUploadAt = 0; // time of the last finished upload
 
   // ===== Loading Firebase and signing in =====
 
@@ -100,7 +117,7 @@
     return connection;
   }
 
-  // ===== Group codes and weeks =====
+  // ===== Group codes, days and weeks =====
 
   /** Creates a random, easy-to-dictate group code: "AHOJ-XXXX-XXXX". */
   function newGroupCode() {
@@ -148,19 +165,26 @@
     return isAlive ? progress.streakDays : 0;
   }
 
-  // ===== Upload and download =====
+  // ===== Upload and download of the table =====
 
   /** The row this learner shows in the table, as the access rules expect it. */
-  function buildRow(data, totalPoints, api) {
-    const progress = data.progress;
-    const thisWeek = weekId(new Date());
+  function buildRow(data, api) {
+    const lastExam = data.progress.lastExam;
+    /** Percent of a level, 0 when the level has no sections yet. */
+    function levelPercent(level) { return AppProgress.levelStats(data, level).percent || 0; }
+
     return {
       nickname: data.settings.nickname.trim().slice(0, 20),
-      level: data.settings.friends.level,
-      weekPoints: progress.weekId === thisWeek ? progress.weekPoints : 0,
-      weekId: thisWeek,
-      totalPoints: totalPoints,
-      streak: currentStreak(progress),
+      a1: levelPercent("A1"),
+      a2: levelPercent("A2"),
+      b1: levelPercent("B1"),
+      todayMinutes: Math.min(AppStudyTime.minutesToday(data), 1440),
+      dayId: localDateText(new Date()),
+      weekMinutes: Math.min(AppStudyTime.minutesThisWeek(data), 10080),
+      weekId: weekId(new Date()),
+      examPercent: lastExam ? lastExam.percent : -1,
+      examParts: lastExam ? lastExam.partsDone : 0,
+      streak: currentStreak(data.progress),
       updatedAt: api.serverTimestamp()
     };
   }
@@ -168,8 +192,7 @@
   /**
    * Sends this learner's row. Only one upload runs at a time: a call made
    * while another is running waits for it, then sends whatever changed
-   * meanwhile. (Two uploads at once could reach the server in the wrong
-   * order, and the rules refuse a total that goes down.)
+   * meanwhile.
    */
   function upload(data) {
     if (uploadInProgress) {
@@ -181,10 +204,7 @@
     return uploadInProgress;
   }
 
-  /**
-   * Does the actual upload. The rules accept at most 2000 new points per
-   * write, so a big jump (for example after weeks offline) is sent in steps.
-   */
+  /** Does the actual upload. */
   function sendRow(data) {
     const group = data.settings.friends && data.settings.friends.groupCode;
     if (!group) return Promise.resolve();
@@ -196,27 +216,9 @@
 
     return connect().then(function (session) {
       const reference = session.api.doc(session.db, "groups", group, "players", session.uid);
-      const sync = data.progress.friendsSync;
-      const target = data.progress.totalPoints;
-      let sent = sync.lastPushedTotal === null ? null : sync.lastPushedTotal;
-
-      // First upload in this group: send everything at once (it is a "create").
-      if (sent === null || sent > target) {
-        return session.api.setDoc(reference, buildRow(data, target, session.api)).then(function () {
-          sync.lastPushedTotal = target;
-        });
-      }
-
-      // Later uploads: climb to the target in steps of at most 2000 points.
-      function nextStep() {
-        const stepTotal = Math.min(target, sent + MAX_POINTS_PER_UPLOAD);
-        return session.api.setDoc(reference, buildRow(data, stepTotal, session.api)).then(function () {
-          sent = stepTotal;
-          sync.lastPushedTotal = stepTotal;
-          if (sent < target) return nextStep();
-        });
-      }
-      return nextStep();
+      return session.api.setDoc(reference, buildRow(data, session.api));
+    }).then(function () {
+      lastUploadAt = Date.now();
     }).catch(function (error) {
       data.progress.friendsSync.pending = true; // try again later
       throw error;
@@ -243,26 +245,78 @@
   }
 
   /**
-   * Uploads in the background when there are points not sent yet.
-   * Failures (no internet) are silent: it is retried on the next call.
+   * Uploads in the background when something changed. Without `force`, it
+   * waits at least BACKGROUND_UPLOAD_MS since the last upload (study time
+   * changes every minute). Failures (no internet) are silent: retried later.
    */
-  function syncSoon(data, saveData) {
+  function syncSoon(data, saveData, force) {
     const inGroup = data.settings.friends && data.settings.friends.groupCode;
-    if (!inGroup || !data.progress.friendsSync.pending || !navigator.onLine) return;
+    if (!inGroup || !data.progress.friendsSync || !data.progress.friendsSync.pending || !navigator.onLine) return;
+    if (!force && Date.now() - lastUploadAt < BACKGROUND_UPLOAD_MS) return;
     upload(data).then(saveData).catch(function (error) {
-      console.warn("Leaderboard upload will be retried later.", error);
+      console.warn("Friends' table upload will be retried later.", error);
+    });
+  }
+
+  // ===== Chat =====
+
+  /** The last messages of the group, oldest first, each with `isMine`. */
+  function fetchMessages(groupCode) {
+    return connect().then(function (session) {
+      const api = session.api;
+      const messages = api.collection(session.db, "groups", groupCode, "messages");
+      const newestFirst = api.query(messages, api.orderBy("createdAt", "desc"), api.limit(MESSAGES_SHOWN));
+      return api.getDocs(newestFirst).then(function (snapshot) {
+        return snapshot.docs.map(function (document) {
+          const message = document.data();
+          return {
+            id: document.id,
+            isMine: message.uid === session.uid,
+            nickname: message.nickname,
+            text: message.text,
+            // A message just sent may not have the server time yet.
+            date: message.createdAt && message.createdAt.toDate ? message.createdAt.toDate() : new Date()
+          };
+        }).reverse();
+      });
+    });
+  }
+
+  /** Sends a message (trimmed and cut to the allowed length). */
+  function sendMessage(groupCode, nickname, text) {
+    const clean = String(text).trim().slice(0, MAX_MESSAGE_LENGTH);
+    if (!clean) return Promise.resolve();
+    return connect().then(function (session) {
+      const messages = session.api.collection(session.db, "groups", groupCode, "messages");
+      return session.api.addDoc(messages, {
+        uid: session.uid,
+        nickname: nickname.trim().slice(0, 20),
+        text: clean,
+        createdAt: session.api.serverTimestamp()
+      });
+    });
+  }
+
+  /** Deletes one of the learner's own messages. */
+  function deleteMessage(groupCode, messageId) {
+    return connect().then(function (session) {
+      return session.api.deleteDoc(session.api.doc(session.db, "groups", groupCode, "messages", messageId));
     });
   }
 
   // ===== Public interface =====
 
   window.AppFriends = {
+    MAX_MESSAGE_LENGTH: MAX_MESSAGE_LENGTH,
     newGroupCode: newGroupCode,
     normalizeCode: normalizeCode,
     weekId: weekId,
     upload: upload,
     fetchTable: fetchTable,
     leave: leave,
-    syncSoon: syncSoon
+    syncSoon: syncSoon,
+    fetchMessages: fetchMessages,
+    sendMessage: sendMessage,
+    deleteMessage: deleteMessage
   };
 })();

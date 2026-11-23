@@ -54,7 +54,8 @@
       sections.push(parts.sectionLabel(section.title[language]));
       sections.push(el("div", { className: "card" }, [
         el("p", { className: "field rule" }, [section.rule[language]]),
-        el("ul", { className: "list list--inset" }, section.words.map(wordRow))
+        el("ul", { className: "list list--inset" }, section.words.map(wordRow)),
+        el("div", { className: "field complete-row" }, [AppProgress.completeButton(context, "pron:" + section.id)])
       ]));
     });
 

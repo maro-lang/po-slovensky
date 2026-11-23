@@ -9,7 +9,8 @@
  *   title / description -> texts in Spanish (es) and English (en)
  *
  * Depends on: nothing. When a module is built, its `stage` stays as a
- * record and `ready` becomes true (stage 2: lessons, cases, pronunciation; stage 3: review; stage 4: friends).
+ * record and `ready` becomes true (stage 2: lessons, cases, pronunciation; stage 3: review; stage 4: friends;
+ * stage 5: verbs, A2 lessons and the exam).
  *
  * The stages follow the plan in caracteristicas-v1.md (one folder up).
  */
@@ -20,7 +21,7 @@
   const ALL = [
     {
       id: "lessons",
-      symbol: "A1",
+      symbol: "A2",
       colorKey: "blue",
       stage: 2,
       ready: true,
@@ -60,26 +61,26 @@
       colorKey: "amber",
       stage: 4,
       ready: true,
-      title: { es: "Progreso y amigos", en: "Progress and friends" },
-      description: { es: "Tabla del grupo", en: "Group leaderboard" }
+      title: { es: "Amigos", en: "Friends" },
+      description: { es: "Progreso del grupo y chat", en: "Group progress and chat" }
     },
     {
       id: "verbs",
       symbol: "ísť",
       colorKey: "coral",
       stage: 5,
-      ready: false,
+      ready: true,
       title: { es: "Verbos", en: "Verbs" },
-      description: { es: "Aspecto y movimiento", en: "Aspect and motion" }
+      description: { es: "Conjugador, aspecto y movimiento", en: "Conjugator, aspect and motion" }
     },
     {
       id: "exam",
       symbol: "A2",
       colorKey: "red",
       stage: 5,
-      ready: false,
+      ready: true,
       title: { es: "Modo examen", en: "Exam mode" },
-      description: { es: "Simulacros con tiempo", en: "Timed mock exams" }
+      description: { es: "Simulacro A2 con tiempo", en: "Timed A2 mock test" }
     },
     {
       id: "real",

@@ -13,7 +13,8 @@
  * How to use: main.js calls AppScreens.<name>(container, context), where
  * `context` gives access to the saved data and to navigation.
  *
- * Depends on: storage.js (AppStorage), i18n.js (AppText),
+ * Depends on: storage.js (AppStorage), i18n.js (AppText), progress.js
+ * (AppProgress, level bars), study-time.js (AppStudyTime, minutes today),
  * modules-list.js (AppModules), ui.js (AppUI), srs.js (AppSRS, phrases of
  * the day) and quiz.js (AppQuiz.speakButton, used when drawing). Classes come from
  * css/styles.css.
@@ -169,6 +170,13 @@
         el("h2", { className: "greeting" }, [greeting]),
         el("p", { className: "greeting-sub muted" }, [t("home.subtitle")]),
         statsCard,
+        sectionLabel(t("home.progressTitle")),
+        el("div", { className: "card field" }, [
+          AppProgress.levelBars(data),
+          el("p", { className: "muted small home-time" }, [t("home.timeLine", {
+            today: AppStudyTime.minutesToday(data), week: AppStudyTime.minutesThisWeek(data)
+          })])
+        ]),
         sectionLabel(t("home.phrasesTitle")),
         phrasesCard,
         sectionLabel(t("home.modulesTitle")),

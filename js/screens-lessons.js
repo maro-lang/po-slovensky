@@ -8,7 +8,7 @@
  *
  * Exercise types (see data/lessons-a1.js): "meaning", "say", "fill", "listen".
  *
- * Depends on: data/lessons-a1.js (AppData.lessons), ui.js, i18n.js,
+ * Depends on: data/lessons-a1.js and data/lessons-a2.js (AppData.lessons), ui.js, i18n.js,
  * speech.js, screens.js (AppScreens.parts) and quiz.js (AppQuiz).
  */
 
@@ -30,7 +30,8 @@
   function listPage(container, context) {
     const parts = AppScreens.parts;
 
-    const rows = AppData.lessons.UNITS.map(function (unit) {
+    /** One row of the list: number, Slovak title, meaning and best score. */
+    function unitRow(unit) {
       const best = context.getBestResult("lesson-" + unit.id);
       const subtitle = unit.title[lang()] + (best ? " · " + t("common.bestScore", { correct: best.correct, total: best.total }) : "");
       return el("li", {}, [
@@ -43,15 +44,22 @@
           el("span", { className: "list-row__chevron" }, [icon("chevronRight")])
         ])
       ]);
+    }
+
+    // One group of units per level (A1, A2…), in the order they appear in the data.
+    const levels = [];
+    AppData.lessons.UNITS.forEach(function (unit) { if (levels.indexOf(unit.level) === -1) levels.push(unit.level); });
+    const groups = [];
+    levels.forEach(function (level) {
+      const units = AppData.lessons.UNITS.filter(function (unit) { return unit.level === level; });
+      groups.push(parts.sectionLabel(t("lessons.level", { level: level })), el("ul", { className: "card list" }, units.map(unitRow)));
     });
 
     container.append(
       parts.buildHeader(t("lessons.title"), "home", context),
-      el("section", { className: "content" }, [
-        parts.sectionLabel(t("lessons.levelA1")),
-        el("ul", { className: "card list" }, rows),
+      el("section", { className: "content" }, groups.concat([
         el("p", { className: "muted small note" }, [t("lessons.comingLevels")])
-      ]),
+      ])),
       parts.buildBottomNav("home", context)
     );
   }
@@ -101,9 +109,10 @@
       className: "btn btn--block",
       onClick: function () { context.navigate("module/lessons/" + unit.id + "/practice"); }
     }, [icon("play"), t("lessons.practice")]));
+    content.push(AppProgress.completeButton(context, "lesson:" + unit.id));
 
     container.append(
-      parts.buildHeader(t("lessons.unit", { n: unit.number }) + " · " + unit.title.sk, "module/lessons", context),
+      parts.buildHeader(unit.level + " · " + t("lessons.unit", { n: unit.number }) + " · " + unit.title.sk, "module/lessons", context),
       el("section", { className: "content" }, content),
       parts.buildBottomNav("home", context)
     );

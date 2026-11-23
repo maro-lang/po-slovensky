@@ -16,7 +16,7 @@
 
 // ===== Configuration =====
 
-const CACHE_VERSION = "0.4.0"; // keep equal to APP_VERSION in js/main.js
+const CACHE_VERSION = "0.5.0"; // keep equal to APP_VERSION in js/main.js
 const CACHE_NAME = "po-slovensky-" + CACHE_VERSION;
 
 // Every file the app needs to work offline (paths relative to this file).
@@ -33,9 +33,14 @@ const APP_FILES = [
   "js/data/cases.js",
   "js/data/pronunciation.js",
   "js/data/lessons-a1.js",
+  "js/data/lessons-a2.js",
   "js/data/vocabulary.js",
+  "js/data/verbs.js",
+  "js/data/exam-a2.js",
   "js/srs.js",
   "js/friends.js",
+  "js/progress.js",
+  "js/study-time.js",
   "js/vendor/firebase-lite.js",
   "js/screens.js",
   "js/quiz.js",
@@ -44,6 +49,8 @@ const APP_FILES = [
   "js/screens-lessons.js",
   "js/screens-review.js",
   "js/screens-friends.js",
+  "js/screens-verbs.js",
+  "js/screens-exam.js",
   "js/main.js",
   "icons/icon-192.png",
   "icons/icon-512.png",

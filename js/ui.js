@@ -74,7 +74,9 @@
     play: [["path", "M8 5.5v13l10-6.5z"]],
     share: [["circle", 6, 12, 2.5], ["circle", 17, 6, 2.5], ["circle", 17, 18, 2.5], ["path", "M8.2 10.8l6.6-3.6M8.2 13.2l6.6 3.6"]],
     copy: [["path", "M9 9h10v11H9zM5 15V4h10"]],
-    refresh: [["path", "M19 12a7 7 0 1 1-2.05-4.95M19 4v4h-4"]]
+    refresh: [["path", "M19 12a7 7 0 1 1-2.05-4.95M19 4v4h-4"]],
+    chat: [["path", "M5 5h14v10H10l-4 4v-4H5z"]],
+    send: [["path", "M4 12 20 4l-6 16-3-7z"]]
   };
 
   const SVG_NAMESPACE = "http://www.w3.org/2000/svg";

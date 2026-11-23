@@ -3,6 +3,10 @@
  *
  * How to use:
  *   AppSpeech.speak("Dobrý deň")  -> says it in Slovak
+ *   AppSpeech.speakLines([{ who: "A", line: "…" }, …], onDone)
+ *                                  -> reads a dialogue; speaker B gets a higher
+ *                                     voice so the two people sound different
+ *   AppSpeech.stop()               -> stops talking
  *   AppSpeech.getStatus()          -> "ok", "no-voice", "unsupported" or
  *                                     "checking" (voices still loading)
  *   AppSpeech.onStatusChange(fn)   -> fn(status) runs when the voices load
@@ -23,6 +27,9 @@
   const LANGUAGE = "sk-SK";
   const SPEAKING_RATE = 0.9; // slightly slower than normal, easier for learners
   const VOICE_WAIT_MS = 2000; // some phones load the voice list late
+  // Voice pitch per speaker in dialogues (1 = normal). The phone has a single
+  // Slovak voice, so a different pitch is the only way to tell people apart.
+  const SPEAKER_PITCH = { A: 0.9, B: 1.35 };
 
   // ===== State =====
 
@@ -68,22 +75,51 @@
 
   // ===== Speaking =====
 
+  /** Builds one utterance with the Slovak voice and the learner-friendly speed. */
+  function makeUtterance(text, pitch) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = LANGUAGE; // still set: some engines pick the voice from this alone
+    utterance.rate = SPEAKING_RATE;
+    if (pitch) utterance.pitch = pitch;
+    if (slovakVoice) utterance.voice = slovakVoice;
+    return utterance;
+  }
+
   /** Says a Slovak text. Stops whatever was being said before. */
   function speak(text) {
     if (!isSupported) return;
     window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(makeUtterance(text));
+  }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = LANGUAGE; // still set: some engines pick the voice from this alone
-    utterance.rate = SPEAKING_RATE;
-    if (slovakVoice) utterance.voice = slovakVoice;
-    window.speechSynthesis.speak(utterance);
+  /**
+   * Reads a dialogue line by line (the browser queues the utterances).
+   * `onDone` runs when the last line ends (or at once if speech is not available).
+   */
+  function speakLines(lines, onDone) {
+    if (!isSupported) { if (onDone) onDone(); return; }
+    window.speechSynthesis.cancel();
+    lines.forEach(function (entry, index) {
+      const utterance = makeUtterance(entry.line, SPEAKER_PITCH[entry.who] || 1);
+      if (index === lines.length - 1 && onDone) {
+        utterance.onend = onDone;
+        utterance.onerror = onDone;
+      }
+      window.speechSynthesis.speak(utterance);
+    });
+  }
+
+  /** Stops whatever is being said (for example when leaving a screen). */
+  function stop() {
+    if (isSupported) window.speechSynthesis.cancel();
   }
 
   // ===== Public interface =====
 
   window.AppSpeech = {
     speak: speak,
+    speakLines: speakLines,
+    stop: stop,
     getStatus: function () { return status; },
     onStatusChange: function (listener) { listeners.push(listener); }
   };
