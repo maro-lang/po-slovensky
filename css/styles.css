@@ -1,0 +1,357 @@
+/*
+ * styles.css — Look of the whole app (phone first, works on a PC too).
+ *
+ * Design rules: neutral greys for surfaces and text, ONE accent colour
+ * (cobalt blue) for what can be tapped or is selected, white cards with
+ * thin borders, and the Inter font (bundled in fonts/, so it works offline).
+ * Strong colours are kept for later, for the six grammatical cases.
+ *
+ * Sections: 1. font  2. colours  3. base  4. header and navigation
+ * 5. cards and lists  6. buttons and forms  7. onboarding  8. home
+ * 9. module page  10. toast and helpers.
+ *
+ * Depends on: fonts/*.woff2. Used by index.html.
+ */
+
+/* ===== 1. Font (Inter, SIL Open Font License, see fonts/LICENSE-Inter.txt) ===== */
+
+/* Basic Latin letters. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900; /* variable font: one file, every weight */
+  src: url("../fonts/inter-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Extended Latin letters: Slovak č, š, ž, ľ, ď, ť, ň, ŕ, ĺ live here. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../fonts/inter-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ===== 2. Colours ===== */
+
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-muted: #f0f2f5;
+  --border: #e3e6ea;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --accent: #2952cc;
+  --accent-soft: #e9eefc;   /* tinted background behind accent elements */
+  --accent-text: #ffffff;   /* text on a solid accent background */
+  --shadow: 0 1px 2px rgba(17, 24, 39, 0.05);
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+  --nav-height: 64px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1014;
+    --surface: #171a20;
+    --surface-muted: #1e222a;
+    --border: #272c35;
+    --text: #e8eaee;
+    --text-muted: #9aa1ad;
+    --accent: #7c9bff;
+    --accent-soft: #1c2440;
+    --accent-text: #0e1014;
+    --shadow: none;
+  }
+}
+
+/* ===== 3. Base ===== */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent; /* no grey flash on Android taps */
+}
+
+/* Room at the bottom so the fixed navigation bar never hides content. */
+main { padding-bottom: calc(var(--nav-height) + 24px); max-width: 640px; margin: 0 auto; }
+
+h1, h2, h3 { line-height: 1.25; margin: 0; letter-spacing: -0.01em; }
+p { margin: 0; }
+
+.content { padding: 20px 16px; }
+.stack > * + * { margin-top: 24px; }
+.muted { color: var(--text-muted); }
+.small { font-size: 0.875rem; }
+
+/* Small grey title above a group of cards ("MÓDULOS"). */
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 28px 4px 10px;
+}
+
+/* SVG icons drawn by AppUI.icon(): same colour as the text around them. */
+.icon { width: 22px; height: 22px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ===== 4. Header and navigation ===== */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.header__title { font-size: 1.05rem; font-weight: 600; }
+.header__back {
+  display: flex;
+  border: none;
+  background: none;
+  color: var(--text);
+  padding: 6px;
+  margin-left: -6px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* Small square logo with "Č", also used on the first screen in a bigger size. */
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--nav-height);
+  display: flex;
+  justify-content: center;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom); /* phones with a gesture bar */
+}
+.bottom-nav__item {
+  flex: 1;
+  max-width: 200px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+}
+.bottom-nav__item--active { color: var(--accent); }
+
+/* ===== 5. Cards and lists ===== */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+}
+
+/* A card whose rows are separated by thin lines (module list, settings). */
+.list { padding: 0; margin: 0; list-style: none; overflow: hidden; }
+.list > * + * { border-top: 1px solid var(--border); }
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.list-row:active { background: var(--surface-muted); }
+.list-row__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.list-row__title { font-weight: 600; }
+.list-row__subtitle { font-size: 0.875rem; color: var(--text-muted); }
+.list-row__chevron { color: var(--text-muted); }
+
+/* Square with the module's symbol (A1, Pád, ä...). */
+.chip {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.chip--large { width: 64px; height: 64px; border-radius: 18px; font-size: 1.4rem; }
+
+/* Small grey label such as "Etapa 2". */
+.pill {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+/* ===== 6. Buttons and forms ===== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  padding: 11px 16px;
+  font: inherit;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+.btn--secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn .icon { width: 18px; height: 18px; }
+
+.button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.field { padding: 16px; }
+.field label { display: block; margin-bottom: 8px; font-size: 0.875rem; font-weight: 500; }
+.field__row { display: flex; gap: 8px; }
+
+input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg);
+  color: var(--text);
+}
+input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+/* Two options joined together, one of them selected (base language). */
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface-muted);
+  border-radius: var(--radius-control);
+}
+.segmented__option {
+  border: none;
+  border-radius: 9px;
+  padding: 9px;
+  font: inherit;
+  font-weight: 500;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.segmented__option--active { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(17, 24, 39, 0.12); }
+
+/* ===== 7. Onboarding ===== */
+
+.onboarding { padding: 64px 20px 32px; }
+.onboarding .brand-mark { width: 64px; height: 64px; border-radius: 18px; font-size: 2rem; margin-bottom: 24px; }
+.onboarding__title { font-size: 1.75rem; font-weight: 700; }
+.onboarding__tagline { margin-top: 4px; }
+.onboarding__question { margin-top: 32px; font-weight: 500; }
+.onboarding__question + .onboarding__question { margin-top: 2px; color: var(--text-muted); font-weight: 400; }
+.onboarding__choices { margin-top: 20px; }
+.onboarding__hint { margin-top: 16px; }
+
+/* ===== 8. Home ===== */
+
+.greeting { font-size: 1.6rem; font-weight: 700; }
+.greeting-sub { margin-top: 2px; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; margin-top: 20px; }
+.stat { padding: 16px; display: flex; flex-direction: column; gap: 2px; }
+.stat + .stat { border-left: 1px solid var(--border); }
+.stat__value { font-size: 1.75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat__label { font-size: 0.8125rem; color: var(--text-muted); }
+
+/* ===== 9. Module page ===== */
+
+.module-page { padding-top: 8px; }
+.module-page h2 { font-size: 1.35rem; margin-top: 20px; }
+.module-page p { margin-top: 8px; color: var(--text-muted); }
+.module-page .card { margin-top: 24px; padding: 16px; display: flex; gap: 12px; align-items: center; }
+
+/* ===== 10. Toast and helpers ===== */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-height) + 16px);
+  transform: translateX(-50%) translateY(12px);
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.toast--visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Hidden on screen but still usable (for the file picker). */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* The first group label on a screen needs less space above it. */
+.content > .section-label:first-child { margin-top: 4px; }
