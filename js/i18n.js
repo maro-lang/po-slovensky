@@ -21,7 +21,7 @@
 
   const TEXTS = {
     es: {
-      "app.name": "Po slovensky",
+      "app.name": "Ahoj!",
       "app.tagline": "Eslovaco de A1 a B1",
 
       "onboarding.question": "¿Desde qué idioma quieres aprender eslovaco?",
@@ -180,7 +180,7 @@
       "friends.share": "Compartir",
       "friends.copy": "Copiar",
       "friends.copied": "Copiado.",
-      "friends.inviteText": "¡Aprendamos eslovaco juntos! Únete a mi grupo en Po slovensky con el código {code}: {url}",
+      "friends.inviteText": "¡Aprendamos eslovaco juntos! Únete a mi grupo en Ahoj! con el código {code}: {url}",
       "friends.openChat": "Chat del grupo",
       "friends.tableTitle": "Progreso del grupo",
       "friends.sortProgress": "Progreso",
@@ -301,11 +301,12 @@
       "real.other": "Otro",
 
       "nav.home": "Inicio",
+      "nav.friends": "Amigos",
       "nav.settings": "Ajustes"
     },
 
     en: {
-      "app.name": "Po slovensky",
+      "app.name": "Ahoj!",
       "app.tagline": "Slovak from A1 to B1",
 
       "onboarding.question": "Which language do you want to learn Slovak from?",
@@ -464,7 +465,7 @@
       "friends.share": "Share",
       "friends.copy": "Copy",
       "friends.copied": "Copied.",
-      "friends.inviteText": "Let's learn Slovak together! Join my group in Po slovensky with the code {code}: {url}",
+      "friends.inviteText": "Let's learn Slovak together! Join my group in Ahoj! with the code {code}: {url}",
       "friends.openChat": "Group chat",
       "friends.tableTitle": "Group progress",
       "friends.sortProgress": "Progress",
@@ -585,6 +586,7 @@
       "real.other": "Them",
 
       "nav.home": "Home",
+      "nav.friends": "Friends",
       "nav.settings": "Settings"
     }
   };

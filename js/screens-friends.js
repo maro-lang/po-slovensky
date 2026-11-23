@@ -191,7 +191,7 @@
         errorLine,
         el("p", { className: "muted small note" }, [t("friends.privacy")])
       ]),
-      parts.buildBottomNav("home", context)
+      parts.buildBottomNav("module/friends", context)
     );
   }
 
@@ -362,7 +362,7 @@
         el("p", { className: "muted small note" }, [t("friends.privacy")]),
         el("div", { className: "danger-zone" }, [leaveButton])
       ]),
-      parts.buildBottomNav("home", context)
+      parts.buildBottomNav("module/friends", context)
     );
 
     refresh();

@@ -76,6 +76,8 @@
     copy: [["path", "M9 9h10v11H9zM5 15V4h10"]],
     refresh: [["path", "M19 12a7 7 0 1 1-2.05-4.95M19 4v4h-4"]],
     chat: [["path", "M5 5h14v10H10l-4 4v-4H5z"]],
+    // Two people: the friends button in the bottom bar
+    friends: [["circle", 9, 8, 3], ["path", "M3.5 19a5.5 5.5 0 0 1 11 0"], ["circle", 16.5, 9, 2.5], ["path", "M16 13.6a4.5 4.5 0 0 1 4.5 4.4"]],
     send: [["path", "M4 12 20 4l-6 16-3-7z"]]
   };
 
