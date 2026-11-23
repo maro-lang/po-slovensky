@@ -21,7 +21,7 @@
   // ===== Configuration =====
 
   // Shown in Settings. Keep it equal to CACHE_VERSION in sw.js.
-  const APP_VERSION = "0.6.5";
+  const APP_VERSION = "0.6.6";
 
   // ===== State =====
 

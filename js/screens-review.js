@@ -33,7 +33,15 @@
   // ===== Small builders =====
 
   /** Drawing of a card or deck, or the first letter when there is none. */
-  function picture(emoji, fallbackText, extraClass) {
+  function picture(emoji, fallbackText, extraClass, badgeEmoji) {
+    // Two drawings: the main one plus a small hint in the corner
+    // (for words without a direct picture, e.g. "lacný" = coin + down arrow).
+    if (emoji && badgeEmoji) {
+      return el("span", { className: "pic pic-combo " + (extraClass || ""), "aria-hidden": "true" }, [
+        el("img", { className: "pic-combo__main", src: AppSRS.iconUrl(emoji), alt: "", loading: "lazy" }),
+        el("img", { className: "pic-combo__badge", src: AppSRS.iconUrl(badgeEmoji), alt: "", loading: "lazy" })
+      ]);
+    }
     if (emoji) {
       return el("img", { className: "pic " + (extraClass || ""), src: AppSRS.iconUrl(emoji), alt: "", loading: "lazy" });
     }
@@ -124,8 +132,17 @@
           }, [icon("play"), t("review.start")]) : null
         ]),
         el("p", { className: "muted small note" }, [t("review.howItWorks", { count: AppSRS.NEW_CARDS_PER_DAY })]),
-        parts.sectionLabel(t("review.topicDecks")),
-        el("ul", { className: "card list" }, builtIn.map(deckRow)),
+      ].concat(
+        // Built-in decks, one list per level (A1, A2, B1); levels without decks are skipped.
+        AppProgress.LEVELS.reduce(function (blocks, level) {
+          const levelDecks = builtIn.filter(function (deck) { return deck.level === level; });
+          if (levelDecks.length) {
+            blocks.push(parts.sectionLabel(t("review.levelDecks", { level: level, count: levelDecks.length })),
+                        el("ul", { className: "card list" }, levelDecks.map(deckRow)));
+          }
+          return blocks;
+        }, [])
+      ).concat([
         parts.sectionLabel(t("review.myDecks")),
         own.length ? el("ul", { className: "card list" }, own.map(deckRow)) : null,
         el("div", { className: "card" + (own.length ? " card--spaced" : "") }, [newDeckForm]),
@@ -134,7 +151,7 @@
           onClick: function () { createDeck(t("review.readingDeckName"), context); }
         }, [t("review.createReadingDeck")]),
         el("p", { className: "muted small note" }, [t("review.credits")])
-      ]),
+      ])),
       parts.buildBottomNav("home", context)
     );
   }
@@ -158,7 +175,7 @@
 
     const cardRows = deck.cards.map(function (card, index) {
       const row = el("li", { className: "phrase-row" }, [
-        card.icon ? picture(card.icon, card.sk, "pic--small") : null,
+        card.icon ? picture(card.icon, card.sk, "pic--small", card.icon2) : null,
         el("div", { className: "phrase-row__text" }, [
           el("span", { className: "phrase-row__sk" }, [card.sk]),
           el("span", { className: "muted small" }, [meaningOf(card)])
@@ -337,7 +354,7 @@
 
       body.append(
         el("div", { className: "card flash" }, [
-          card.icon ? picture(card.icon, card.sk, "pic--large") : null,
+          card.icon ? picture(card.icon, card.sk, "pic--large", card.icon2) : null,
           el("div", { className: "flash__word-row" }, [
             el("p", { className: "flash__word" }, [card.sk]),
             AppQuiz.speakButton(card.sk)

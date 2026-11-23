@@ -8,7 +8,7 @@
  *   pron:<sectionId>     -> the 8 pronunciation sections (A1)
  *   verbs:<topicId>      -> the 6 verb topics (A2)
  *   real:<situationId>   -> the 8 real-life situations in Bratislava (B1)
- *   deck:<deckId>        -> the 9 built-in flashcard decks (level in DECK_LEVELS)
+ *   deck:<deckId>        -> every built-in flashcard deck (its `level` field)
  * The learner decides when a section is done, with the button
  * "Mark as completed" at the end of each one. Decks are also marked
  * automatically once every card of the deck has been reviewed at least once
@@ -35,13 +35,6 @@
 
   const LEVELS = ["A1", "A2", "B1"];
 
-  // Level of each built-in flashcard deck: everyday topics are A1,
-  // work, health and paperwork vocabulary is A2.
-  const DECK_LEVELS = {
-    food: "A1", transport: "A1", home: "A1", family: "A1", shopping: "A1", "free-time": "A1",
-    work: "A2", health: "A2", offices: "A2"
-  };
-
   // ===== Sections =====
 
   /** Every section of the app, with the level it belongs to. */
@@ -53,7 +46,7 @@
     if (AppData.verbs) AppData.verbs.TOPICS.forEach(function (topic) { sections.push({ key: "verbs:" + topic.id, level: "A2" }); });
     if (AppData.realLife) AppData.realLife.SITUATIONS.forEach(function (situation) { sections.push({ key: "real:" + situation.id, level: "B1" }); });
     AppData.vocabulary.DECKS.forEach(function (deck) {
-      if (DECK_LEVELS[deck.id]) sections.push({ key: "deck:" + deck.id, level: DECK_LEVELS[deck.id] });
+      if (deck.level) sections.push({ key: "deck:" + deck.id, level: deck.level });
     });
     return sections;
   }
@@ -83,7 +76,7 @@
     let changed = false;
     AppData.vocabulary.DECKS.forEach(function (deck) {
       const key = "deck:" + deck.id;
-      if (completed[key] || !DECK_LEVELS[deck.id]) return;
+      if (completed[key] || !deck.level) return;
       const allReviewed = deck.cards.every(function (card) { return Boolean(data.progress.cards[deck.id + ":" + card.sk]); });
       if (allReviewed) { completed[key] = AppSRS.today(); changed = true; }
     });
@@ -157,7 +150,6 @@
   window.AppProgress = {
     LEVELS: LEVELS,
     allSections: allSections,
-    DECK_LEVELS: DECK_LEVELS,
     isCompleted: isCompleted,
     doneClass: doneClass,
     markLearnedDecks: markLearnedDecks,

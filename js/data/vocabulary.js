@@ -1,14 +1,19 @@
 /*
  * data/vocabulary.js — Vocabulary decks by topic, for the spaced review.
  *
- * What it holds: AppData.vocabulary.DECKS. Each deck has an id, a title
- * (sk / es / en), an icon and its cards. Each card has:
+ * What it holds: AppData.vocabulary.DECKS. Each deck has an id, a level
+ * ("A1", "A2" or "B1": the level bar it counts for), a title (sk / es / en),
+ * an icon and its cards. More decks are added by vocabulary-a1.js,
+ * vocabulary-a2.js and vocabulary-b1.js, which push into the same list.
+ * Each card has:
  *   sk        -> the Slovak word
  *   es / en   -> its meaning
  *   g         -> grammatical gender of nouns: "m", "f", "n" or "pl"
  *                (plural-only); left out for adjectives
  *   icon      -> an emoji; the app shows the matching OpenMoji drawing
  *                (img/openmoji/<codepoints>.svg, see js/srs.js)
+ *   icon2     -> optional second emoji, drawn small in a corner as a hint
+ *                (for words with no direct picture: "lacný" = 🪙 + ⬇️)
  *   ex        -> an example sentence { sk, es, en }
  *
  * Conventions: Slovak text is in fields called `sk`, so the quality-check
@@ -26,7 +31,7 @@ window.AppData = window.AppData || {};
 
   const DECKS = [
     {
-      id: "food", icon: "🍽️",
+      id: "food", level: "A1", icon: "🍽️",
       title: { sk: "Jedlo a pitie", es: "Comida y bebida", en: "Food and drink" },
       cards: [
         { sk: "chlieb", g: "m", icon: "🍞", es: "pan", en: "bread", ex: { sk: "Kúpim chlieb.", es: "Compraré pan.", en: "I'll buy bread." } },
@@ -44,7 +49,7 @@ window.AppData = window.AppData || {};
       ]
     },
     {
-      id: "transport", icon: "🚋",
+      id: "transport", level: "A1", icon: "🚋",
       title: { sk: "Doprava", es: "Transporte", en: "Transport" },
       cards: [
         { sk: "električka", g: "f", icon: "🚋", es: "tranvía", en: "tram", ex: { sk: "Idem električkou.", es: "Voy en tranvía.", en: "I'm going by tram." } },
@@ -62,7 +67,7 @@ window.AppData = window.AppData || {};
       ]
     },
     {
-      id: "home", icon: "🏠",
+      id: "home", level: "A1", icon: "🏠",
       title: { sk: "Bývanie", es: "La casa", en: "Home" },
       cards: [
         { sk: "dom", g: "m", icon: "🏠", es: "casa", en: "house", ex: { sk: "Náš dom je malý.", es: "Nuestra casa es pequeña.", en: "Our house is small." } },
@@ -80,7 +85,7 @@ window.AppData = window.AppData || {};
       ]
     },
     {
-      id: "family", icon: "👪",
+      id: "family", level: "A1", icon: "👪",
       title: { sk: "Rodina", es: "Familia", en: "Family" },
       cards: [
         { sk: "rodina", g: "f", icon: "👪", es: "familia", en: "family", ex: { sk: "Mám veľkú rodinu.", es: "Tengo una familia grande.", en: "I have a big family." } },
@@ -98,7 +103,7 @@ window.AppData = window.AppData || {};
       ]
     },
     {
-      id: "work", icon: "💼",
+      id: "work", level: "A2", icon: "💼",
       title: { sk: "Práca", es: "Trabajo", en: "Work" },
       cards: [
         { sk: "práca", g: "f", icon: "💼", es: "trabajo", en: "work", ex: { sk: "Idem do práce.", es: "Voy al trabajo.", en: "I'm going to work." } },
@@ -116,7 +121,7 @@ window.AppData = window.AppData || {};
       ]
     },
     {
-      id: "health", icon: "🩺",
+      id: "health", level: "A2", icon: "🩺",
       title: { sk: "Zdravie", es: "Salud", en: "Health" },
       cards: [
         { sk: "lekár", g: "m", icon: "🧑‍⚕️", es: "médico", en: "doctor", ex: { sk: "Musím ísť k lekárovi.", es: "Tengo que ir al médico.", en: "I have to go to the doctor." } },
@@ -134,7 +139,7 @@ window.AppData = window.AppData || {};
       ]
     },
     {
-      id: "shopping", icon: "🛒",
+      id: "shopping", level: "A1", icon: "🛒",
       title: { sk: "Nákupy", es: "Compras", en: "Shopping" },
       cards: [
         { sk: "obchod", g: "m", icon: "🏪", es: "tienda", en: "shop", ex: { sk: "Obchod je zatvorený.", es: "La tienda está cerrada.", en: "The shop is closed." } },
@@ -152,7 +157,7 @@ window.AppData = window.AppData || {};
       ]
     },
     {
-      id: "offices", icon: "🏛️",
+      id: "offices", level: "A2", icon: "🏛️",
       title: { sk: "Úrady", es: "Trámites", en: "Paperwork" },
       cards: [
         { sk: "úrad", g: "m", icon: "🏛️", es: "oficina pública", en: "government office", ex: { sk: "Musím ísť na úrad.", es: "Tengo que ir a una oficina pública.", en: "I have to go to the office." } },
@@ -170,7 +175,7 @@ window.AppData = window.AppData || {};
       ]
     },
     {
-      id: "free-time", icon: "🎉",
+      id: "free-time", level: "A1", icon: "🎉",
       title: { sk: "Voľný čas", es: "Salir y tiempo libre", en: "Going out" },
       cards: [
         { sk: "kino", g: "n", icon: "🎬", es: "cine", en: "cinema", ex: { sk: "Ideme do kina?", es: "¿Vamos al cine?", en: "Shall we go to the cinema?" } },
