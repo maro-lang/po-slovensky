@@ -123,12 +123,14 @@
         };
       }
       if (exercise.type === "listen") {
+        // Options are either a plain list (digits) or one list per language.
+        const options = Array.isArray(exercise.options) ? exercise.options : exercise.options[lang()];
         return {
           prompt: t("lessons.listenChoose"),
           audioText: exercise.sk,
-          options: exercise.options,
+          options: options,
           answerIndex: exercise.answer,
-          afterAnswer: { sk: exercise.sk, text: exercise.options[exercise.answer] }
+          afterAnswer: { sk: exercise.sk, text: options[exercise.answer] }
         };
       }
       if (exercise.type === "fill") {

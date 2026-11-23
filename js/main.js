@@ -17,7 +17,7 @@
   // ===== Configuration =====
 
   // Shown in Settings. Keep it equal to CACHE_VERSION in sw.js.
-  const APP_VERSION = "0.2.0";
+  const APP_VERSION = "0.3.0";
 
   // ===== State =====
 
@@ -125,6 +125,7 @@
       recordStudy: recordStudy,
       getBestResult: getBestResult,
       rerender: renderCurrentRoute,
+      saveData: function () { AppStorage.save(appData); },
       chooseBaseLanguage: function (languageCode) {
         updateSettings({ baseLanguage: languageCode });
         navigate("home");

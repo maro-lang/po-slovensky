@@ -3,7 +3,8 @@
  *
  * Screens:
  *   onboarding -> first launch: choose Spanish or English as base language
- *   home       -> greeting, points, streak and the list of modules
+ *   home       -> greeting, points, streak, the 3 phrases of the day and
+ *                 the list of modules
  *   module     -> one module: built modules are drawn by their own file
  *                 (screens-cases.js, screens-lessons.js…, registered in
  *                 AppModuleScreens); the rest show "coming in stage N"
@@ -13,7 +14,8 @@
  * `context` gives access to the saved data and to navigation.
  *
  * Depends on: storage.js (AppStorage), i18n.js (AppText),
- * modules-list.js (AppModules) and ui.js (AppUI). Classes come from
+ * modules-list.js (AppModules), ui.js (AppUI), srs.js (AppSRS, phrases of
+ * the day) and quiz.js (AppQuiz.speakButton, used when drawing). Classes come from
  * css/styles.css.
  */
 
@@ -145,6 +147,18 @@
       ])
     ]);
 
+    // The 3 phrases of the day: the same all day, new ones tomorrow (see srs.js).
+    const language = AppText.getLanguage();
+    const phrasesCard = el("ul", { className: "card list" }, AppSRS.dailyPhrases(AppSRS.today(), 3).map(function (phrase) {
+      return el("li", { className: "phrase-row" }, [
+        el("div", { className: "phrase-row__text" }, [
+          el("span", { className: "phrase-row__sk" }, [phrase.sk]),
+          el("span", { className: "muted small" }, [phrase[language]])
+        ]),
+        AppQuiz.speakButton(phrase.sk)
+      ]);
+    }));
+
     const moduleList = el("ul", { className: "card list" }, AppModules.ALL.map(function (module) {
       return buildModuleRow(module, context);
     }));
@@ -155,6 +169,8 @@
         el("h2", { className: "greeting" }, [greeting]),
         el("p", { className: "greeting-sub muted" }, [t("home.subtitle")]),
         statsCard,
+        sectionLabel(t("home.phrasesTitle")),
+        phrasesCard,
         sectionLabel(t("home.modulesTitle")),
         moduleList
       ]),
@@ -285,7 +301,8 @@
         sectionLabel(t("settings.aboutTitle")),
         el("div", { className: "card field" }, [
           el("p", { className: "small" }, [t("settings.version", { version: context.appVersion })]),
-          el("p", { className: "muted small", id: "offline-status" }, [offlineText])
+          el("p", { className: "muted small", id: "offline-status" }, [offlineText]),
+          el("p", { className: "muted small" }, [t("settings.credits")])
         ])
       ]),
       buildBottomNav("settings", context)

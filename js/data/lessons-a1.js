@@ -11,7 +11,8 @@
  *        type "meaning" : show a Slovak phrase, choose its translation
  *        type "say"     : show a translation, choose the Slovak phrase
  *        type "fill"    : complete a Slovak sentence
- *        type "listen"  : hear a Slovak word, choose what it is
+ *        type "listen"  : hear a Slovak word, choose what it is (options are
+ *                         either one list, e.g. digits, or one list per language)
  *
  * Conventions: Slovak text is in fields called `sk` (or in `options` of
  * "say", "fill" and "listen" exercises), so the quality-check script can
@@ -159,6 +160,138 @@ window.AppData = window.AppData || {};
         { type: "fill", sk: "___ ženy", options: ["dve", "dva", "dvaja", "jedna"], answer: 0 },
         { type: "say", prompt: { es: "¿Cómo se dice 10?", en: "How do you say 10?" },
           options: ["desať", "deväť", "sedem", "osem"], answer: 0 }
+      ]
+    },
+
+    // ===== Unit 4: family and the verb mať =====
+    {
+      id: "a1-4",
+      level: "A1",
+      number: 4,
+      title: { sk: "Rodina", es: "La familia", en: "Family" },
+      intro: {
+        es: "Hablar de tu familia y el segundo verbo clave: mať (tener).",
+        en: "Talk about your family, plus the second key verb: mať (to have)."
+      },
+      phrases: [
+        { sk: "Mám brata a sestru.", es: "Tengo un hermano y una hermana.", en: "I have a brother and a sister." },
+        { sk: "Máš deti?", es: "¿Tienes hijos?", en: "Do you have children?" },
+        { sk: "Nemám deti.", es: "No tengo hijos.", en: "I don't have children." },
+        { sk: "Toto je moja mama.", es: "Esta es mi mamá.", en: "This is my mum." },
+        { sk: "Toto je môj otec.", es: "Este es mi padre.", en: "This is my father." },
+        { sk: "Koľko máš rokov?", es: "¿Cuántos años tienes?", en: "How old are you?" },
+        { sk: "Mám tridsať rokov.", es: "Tengo treinta años.", en: "I'm thirty." },
+        { sk: "Moji rodičia bývajú v Argentíne.", es: "Mis padres viven en Argentina.", en: "My parents live in Argentina." }
+      ],
+      grammar: {
+        title: { sk: "mať", es: "El verbo mať (tener)", en: "The verb mať (to have)" },
+        rows: [
+          { sk: "ja mám", es: "yo tengo", en: "I have" },
+          { sk: "ty máš", es: "tú tienes", en: "you have" },
+          { sk: "on, ona, ono má", es: "él, ella tiene", en: "he, she, it has" },
+          { sk: "my máme", es: "nosotros tenemos", en: "we have" },
+          { sk: "vy máte", es: "ustedes tienen / usted tiene", en: "you have (plural or formal)" },
+          { sk: "oni, ony majú", es: "ellos, ellas tienen", en: "they have" }
+        ]
+      },
+      note: {
+        es: "Para negar se pega «ne» al verbo: mám → nemám. La edad se dice con mať, como en castellano: «Mám tridsať rokov».",
+        en: "To make it negative, attach «ne» to the verb: mám → nemám. Age is said with mať (to have): «Mám tridsať rokov» (I have thirty years)."
+      },
+      exercises: [
+        { type: "fill", sk: "Ja ___ brata.", options: ["mám", "máš", "má", "majú"], answer: 0 },
+        { type: "fill", sk: "My ___ veľkú rodinu.", options: ["máme", "máte", "mám", "má"], answer: 0 },
+        { type: "fill", sk: "Oni ___ dve deti.", options: ["majú", "máme", "má", "máš"], answer: 0 },
+        { type: "fill", sk: "___ ty deti?", options: ["Máš", "Mám", "Máte", "Majú"], answer: 0 },
+        { type: "meaning", sk: "Koľko máš rokov?",
+          options: { es: ["¿Cuántos años tienes?", "¿Cuántos hermanos tienes?", "¿Tienes hijos?", "¿Cómo te llamas?"],
+                     en: ["How old are you?", "How many siblings do you have?", "Do you have children?", "What's your name?"] }, answer: 0 },
+        { type: "say", prompt: { es: "«No tengo hijos»", en: "«I don't have children»" },
+          options: ["Nemám deti.", "Mám deti.", "Máš deti?", "Nemá deti."], answer: 0 }
+      ]
+    },
+
+    // ===== Unit 5: days and time =====
+    {
+      id: "a1-5",
+      level: "A1",
+      number: 5,
+      title: { sk: "Dni a hodiny", es: "Días y horas", en: "Days and time" },
+      intro: {
+        es: "Los días de la semana, hoy, mañana, ayer, y cómo decir la hora.",
+        en: "The days of the week, today, tomorrow, yesterday, and how to tell the time."
+      },
+      phrases: [
+        { sk: "pondelok", es: "lunes", en: "Monday" },
+        { sk: "utorok", es: "martes", en: "Tuesday" },
+        { sk: "streda", es: "miércoles", en: "Wednesday" },
+        { sk: "štvrtok", es: "jueves", en: "Thursday" },
+        { sk: "piatok", es: "viernes", en: "Friday" },
+        { sk: "sobota", es: "sábado", en: "Saturday" },
+        { sk: "nedeľa", es: "domingo", en: "Sunday" },
+        { sk: "dnes, zajtra, včera", es: "hoy, mañana, ayer", en: "today, tomorrow, yesterday" },
+        { sk: "V pondelok pracujem.", es: "El lunes trabajo.", en: "On Monday I work." },
+        { sk: "Koľko je hodín?", es: "¿Qué hora es?", en: "What time is it?" },
+        { sk: "Je jedna hodina.", es: "Es la una.", en: "It's one o'clock." },
+        { sk: "Sú tri hodiny.", es: "Son las tres.", en: "It's three o'clock." },
+        { sk: "Je päť hodín.", es: "Son las cinco.", en: "It's five o'clock." }
+      ],
+      note: {
+        es: "«El lunes» se dice con v + acusativo: v pondelok, v stredu, v sobotu, v nedeľu. Con la hora cambia la forma: 1 → je jedna hodina; 2, 3, 4 → sú … hodiny; 5 o más → je … hodín.",
+        en: "«On Monday» is v + accusative: v pondelok, v stredu, v sobotu, v nedeľu. The hour changes form: 1 → je jedna hodina; 2, 3, 4 → sú … hodiny; 5 or more → je … hodín."
+      },
+      exercises: [
+        { type: "listen", sk: "streda",
+          options: { es: ["miércoles", "jueves", "sábado", "martes"], en: ["Wednesday", "Thursday", "Saturday", "Tuesday"] }, answer: 0 },
+        { type: "say", prompt: { es: "¿Cómo se dice «viernes»?", en: "How do you say «Friday»?" },
+          options: ["piatok", "pondelok", "štvrtok", "sobota"], answer: 0 },
+        { type: "fill", sk: "V ___ idem na výlet. (sobota)", options: ["sobotu", "sobota", "soboty", "sobote"], answer: 0 },
+        { type: "fill", sk: "Sú dve ___.", options: ["hodiny", "hodín", "hodina", "hodinou"], answer: 0 },
+        { type: "fill", sk: "Je šesť ___.", options: ["hodín", "hodiny", "hodina", "hodinu"], answer: 0 },
+        { type: "meaning", sk: "zajtra",
+          options: { es: ["mañana", "ayer", "hoy", "la semana"], en: ["tomorrow", "yesterday", "today", "the week"] }, answer: 0 }
+      ]
+    },
+
+    // ===== Unit 6: at the restaurant =====
+    {
+      id: "a1-6",
+      level: "A1",
+      number: 6,
+      title: { sk: "V reštaurácii", es: "En el restaurante", en: "At the restaurant" },
+      intro: {
+        es: "Pedir, preguntar el precio y pagar en un restaurante o un café.",
+        en: "Order, ask the price and pay in a restaurant or café."
+      },
+      phrases: [
+        { sk: "Je tu voľné?", es: "¿Está libre (este lugar)?", en: "Is this seat free?" },
+        { sk: "Máte jedálny lístok?", es: "¿Tiene la carta?", en: "Do you have a menu?" },
+        { sk: "Dám si polievku.", es: "Voy a tomar una sopa.", en: "I'll have the soup." },
+        { sk: "Prosím si kávu.", es: "Un café, por favor.", en: "A coffee, please." },
+        { sk: "Koľko to stojí?", es: "¿Cuánto cuesta?", en: "How much is it?" },
+        { sk: "Účet, prosím.", es: "La cuenta, por favor.", en: "The bill, please." },
+        { sk: "Platím kartou.", es: "Pago con tarjeta.", en: "I'm paying by card." },
+        { sk: "Dobrú chuť!", es: "¡Buen provecho!", en: "Enjoy your meal!" },
+        { sk: "Na zdravie!", es: "¡Salud!", en: "Cheers!" },
+        { sk: "Bolo to výborné.", es: "Estuvo excelente.", en: "It was excellent." }
+      ],
+      note: {
+        es: "Al pedir, lo que pides va en acusativo: káva → «Prosím si kávu», polievka → «Dám si polievku».",
+        en: "When ordering, what you ask for is in the accusative: káva → «Prosím si kávu», polievka → «Dám si polievku»."
+      },
+      exercises: [
+        { type: "say", prompt: { es: "Quieres pagar:", en: "You want to pay:" },
+          options: ["Účet, prosím.", "Dobrú chuť!", "Je tu voľné?", "Na zdravie!"], answer: 0 },
+        { type: "meaning", sk: "Koľko to stojí?",
+          options: { es: ["¿Cuánto cuesta?", "¿Qué hora es?", "¿Está libre?", "¿Tiene la carta?"],
+                     en: ["How much is it?", "What time is it?", "Is this seat free?", "Do you have a menu?"] }, answer: 0 },
+        { type: "fill", sk: "Prosím si ___. (káva)", options: ["kávu", "káva", "kávy", "káve"], answer: 0 },
+        { type: "fill", sk: "Dám si ___. (polievka)", options: ["polievku", "polievka", "polievky", "polievke"], answer: 0 },
+        { type: "say", prompt: { es: "Antes de comer se dice:", en: "Before eating you say:" },
+          options: ["Dobrú chuť!", "Na zdravie!", "Dovidenia!", "Prepáčte."], answer: 0 },
+        { type: "listen", sk: "Platím kartou.",
+          options: { es: ["Pago con tarjeta.", "Pago en efectivo.", "La cuenta, por favor.", "¿Cuánto cuesta?"],
+                     en: ["I'm paying by card.", "I'm paying in cash.", "The bill, please.", "How much is it?"] }, answer: 0 }
       ]
     }
   ];

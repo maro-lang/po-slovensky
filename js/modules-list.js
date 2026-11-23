@@ -9,7 +9,7 @@
  *   title / description -> texts in Spanish (es) and English (en)
  *
  * Depends on: nothing. When a module is built, its `stage` stays as a
- * record and `ready` becomes true (stage 2: lessons, cases, pronunciation).
+ * record and `ready` becomes true (stage 2: lessons, cases, pronunciation; stage 3: review).
  *
  * The stages follow the plan in caracteristicas-v1.md (one folder up).
  */
@@ -50,7 +50,7 @@
       symbol: "↻",
       colorKey: "green",
       stage: 3,
-      ready: false,
+      ready: true,
       title: { es: "Repaso espaciado", en: "Spaced review" },
       description: { es: "Tarjetas con imágenes", en: "Cards with pictures" }
     },

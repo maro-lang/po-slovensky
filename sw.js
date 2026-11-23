@@ -3,7 +3,8 @@
  * without internet.
  *
  * How it works:
- *   - On install, it downloads every file listed in APP_FILES into a cache.
+ *   - On install, it downloads every file listed in APP_FILES into a cache,
+ *     plus the card drawings listed in img/openmoji/files.json.
  *   - On each request, it answers from that cache first; if the file is not
  *     there, it asks the network.
  *   - When CACHE_VERSION changes, the old copy is deleted and a new one is
@@ -15,7 +16,7 @@
 
 // ===== Configuration =====
 
-const CACHE_VERSION = "0.2.0"; // keep equal to APP_VERSION in js/main.js
+const CACHE_VERSION = "0.3.0"; // keep equal to APP_VERSION in js/main.js
 const CACHE_NAME = "po-slovensky-" + CACHE_VERSION;
 
 // Every file the app needs to work offline (paths relative to this file).
@@ -32,11 +33,14 @@ const APP_FILES = [
   "js/data/cases.js",
   "js/data/pronunciation.js",
   "js/data/lessons-a1.js",
+  "js/data/vocabulary.js",
+  "js/srs.js",
   "js/screens.js",
   "js/quiz.js",
   "js/screens-cases.js",
   "js/screens-pronunciation.js",
   "js/screens-lessons.js",
+  "js/screens-review.js",
   "js/main.js",
   "icons/icon-192.png",
   "icons/icon-512.png",
@@ -50,10 +54,24 @@ const APP_FILES = [
 self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(function (cache) { return cache.addAll(APP_FILES); })
+      .then(function (cache) {
+        return cache.addAll(APP_FILES).then(function () { return cacheCardPictures(cache); });
+      })
       .then(function () { return self.skipWaiting(); }) // use the new version at once
   );
 });
+
+/**
+ * Saves every OpenMoji drawing of the vocabulary cards. Their names are
+ * listed in img/openmoji/files.json (written by herramientas/copy_icons.py).
+ */
+function cacheCardPictures(cache) {
+  return fetch("img/openmoji/files.json")
+    .then(function (response) { return response.json(); })
+    .then(function (fileNames) {
+      return cache.addAll(fileNames.map(function (name) { return "img/openmoji/" + name; }));
+    });
+}
 
 // ===== Activate: delete copies from older versions =====
 

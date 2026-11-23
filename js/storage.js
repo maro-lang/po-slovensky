@@ -40,7 +40,10 @@
         totalPoints: 0,
         streakDays: 0,
         lastStudyDate: null, // "YYYY-MM-DD" of the last day with study
-        results: {} // best score per exercise, e.g. { "cases-gen": { correct: 4, total: 5 } }
+        results: {}, // best score per exercise, e.g. { "cases-gen": { correct: 4, total: 5 } }
+        cards: {}, // spaced-review state per card, e.g. { "food:chlieb": { box: 2, due: "2026-11-25" } }
+        newToday: null, // { date, count }: new cards introduced today (daily limit)
+        customDecks: [] // the learner's own decks: [{ id, name, icon, cards: [...] }]
       }
     };
   }
