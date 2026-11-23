@@ -264,7 +264,8 @@ p { margin: 0; }
 .field label { display: block; margin-bottom: 8px; font-size: 0.875rem; font-weight: 500; }
 .field__row { display: flex; gap: 8px; }
 
-input[type="text"] {
+input[type="text"],
+input[type="search"] {
   flex: 1;
   min-width: 0;
   padding: 11px 12px;
@@ -274,7 +275,8 @@ input[type="text"] {
   background: var(--bg);
   color: var(--text);
 }
-input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+input[type="text"]:focus,
+input[type="search"]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 
 /* Two options joined together, one of them selected (base language). */
 .segmented {
@@ -826,3 +828,34 @@ input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1p
 .dialogue__sk { font-weight: 600; }
 
 .exam-level-note { margin: -4px 4px 10px; }
+
+/* ===== 20. Word search and review by level (version 0.7.0) ===== */
+
+/* The search box fills its card; a gap separates it from "For today". */
+.search-block { margin-bottom: 12px; }
+.search-block input[type="search"] { width: 100%; }
+.search-results__count { margin: 10px 4px; }
+
+/* A search result: the word and its meaning are one big tap target that opens the deck. */
+.search-hit__open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+}
+.search-hit__deck { margin-top: 2px; font-size: 0.75rem; color: var(--accent); }
+
+/* The card the learner searched for, on the deck page. */
+.phrase-row--found { background: var(--accent-soft); }
+
+/* All / A1 / A2 / B1 for the general review. */
+.segmented--four { grid-template-columns: repeat(4, 1fr); }
+.review-levels { margin: 10px 0; }
+.review-levels__note { margin: 0 0 6px; }

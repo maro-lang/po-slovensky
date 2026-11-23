@@ -2,9 +2,13 @@
  * screens-review.js — Spaced review with flash cards (module "review").
  *
  * Addresses (after #/module/review):
- *   (nothing)          -> today's summary, the topic decks and "My decks"
+ *   (nothing)          -> word search, today's summary (with the level
+ *                         chooser All / A1 / A2 / B1), the topic decks and "My decks"
  *   deck/<id>          -> one deck: its cards; own decks can be edited here
- *   session            -> review session with every deck
+ *   deck/<id>/<n>      -> the same deck with card number n highlighted
+ *                         (where a search result leads)
+ *   session            -> review session with every deck of the chosen level
+ *                         (settings.reviewLevel; "all" also includes own decks)
  *   session/<deckId>   -> review session with one deck (cards due and new ones)
  *   session/<deckId>/all -> "review again": every card of the deck, even if none
  *                         is due. Only "I didn't know it" changes the schedule
@@ -79,13 +83,174 @@
     return button;
   }
 
+  // ===== Review by level =====
+
+  // Choices for the general review: every deck, or only one level's decks.
+  const REVIEW_LEVELS = ["all", "A1", "A2", "B1"];
+
+  /** The level chosen for the general review ("all" if none was chosen yet). */
+  function chosenReviewLevel(data) {
+    const level = data.settings.reviewLevel;
+    return REVIEW_LEVELS.indexOf(level) >= 0 ? level : "all";
+  }
+
+  /**
+   * Decks used by the general review. With one level chosen, only the
+   * built-in decks of that level; own decks have no level, so they are
+   * only included in "all".
+   */
+  function decksForReview(data) {
+    const decks = AppSRS.allDecks(data);
+    const level = chosenReviewLevel(data);
+    if (level === "all") return decks;
+    return decks.filter(function (deck) { return !deck.custom && deck.level === level; });
+  }
+
+  /** Joined buttons All / A1 / A2 / B1; choosing one saves it and redraws the page. */
+  function buildLevelChooser(context) {
+    const current = chosenReviewLevel(context.getData());
+    return el("div", { className: "segmented segmented--four review-levels", role: "group", "aria-label": t("review.levelChooser") },
+      REVIEW_LEVELS.map(function (level) {
+        const isActive = level === current;
+        return el("button", {
+          type: "button",
+          className: "segmented__option" + (isActive ? " segmented__option--active" : ""),
+          "aria-pressed": String(isActive),
+          "data-review-level": level,
+          onClick: function () {
+            context.getData().settings.reviewLevel = level;
+            context.saveData();
+            context.rerender();
+          }
+        }, [level === "all" ? t("review.levelAll") : level]);
+      }));
+  }
+
+  // ===== Word search =====
+
+  // Most results shown at once; with more, the learner is asked to type more letters.
+  const MAX_SEARCH_RESULTS = 50;
+
+  // Text in the search box. Kept outside the page so it is still there when
+  // the learner opens a deck from a result and comes back.
+  let lastSearch = "";
+
+  /**
+   * Lower case without accents or háčeks, so "zena" finds "žena",
+   * "dakujem" finds "ďakujem" and "cancion" finds "canción".
+   * (NFD splits "ž" into "z" + a combining mark; the marks are then removed.)
+   */
+  function simplify(text) {
+    return String(text || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  }
+
+  /**
+   * How well a text matches the search (lower is better), or -1 if it does not:
+   * 0 = the whole text, 1 = the start of the text, 2 = the start of one of
+   * its words, 3 = anywhere inside a word.
+   */
+  function matchRank(text, query) {
+    const simple = simplify(text);
+    const position = simple.indexOf(query);
+    if (position < 0) return -1;
+    if (simple === query) return 0;
+    if (position === 0) return 1;
+    // A word starts after a space, a comma, a slash, a bracket, etc.
+    if (/[^a-z0-9]/.test(simple.charAt(position - 1))) return 2;
+    return 3;
+  }
+
+  /**
+   * Every card (of every deck, built-in and own) whose Slovak word or meaning
+   * in the current language matches the search. Best matches first, then in
+   * Slovak alphabetical order. Each result is { deck, card, index, rank }.
+   */
+  function searchCards(decks, searchText) {
+    const query = simplify(searchText.trim());
+    if (!query) return [];
+    const results = [];
+    decks.forEach(function (deck) {
+      deck.cards.forEach(function (card, index) {
+        const ranks = [matchRank(card.sk, query), matchRank(meaningOf(card), query)].filter(function (rank) { return rank >= 0; });
+        if (ranks.length) results.push({ deck: deck, card: card, index: index, rank: Math.min.apply(null, ranks) });
+      });
+    });
+    results.sort(function (a, b) { return a.rank - b.rank || a.card.sk.localeCompare(b.card.sk, "sk"); });
+    return results;
+  }
+
+  /** One search result: drawing, word, meaning, its deck and a speaker button. */
+  function searchResultRow(result, context) {
+    const deck = result.deck;
+    const card = result.card;
+    const deckTitle = deck.title ? deck.title[lang()] : deck.name;
+    return el("li", { className: "phrase-row search-hit" }, [
+      card.icon ? picture(card.icon, card.sk, "pic--small", card.icon2) : null,
+      // The text is a button that opens the deck at this card.
+      el("button", {
+        type: "button",
+        className: "search-hit__open",
+        onClick: function () { context.navigate("module/review/deck/" + deck.id + "/" + result.index); }
+      }, [
+        el("span", { className: "phrase-row__sk" }, [card.sk]),
+        el("span", { className: "muted small" }, [meaningOf(card)]),
+        el("span", { className: "search-hit__deck" }, [(deck.level ? deck.level + " · " : "") + deckTitle])
+      ]),
+      AppQuiz.speakButton(card.sk)
+    ]);
+  }
+
+  /**
+   * The search box and the place where its results appear. While there is
+   * text in the box, the rest of the page (`pageBlocks`) is hidden so the
+   * results sit right under the box, above the phone's keyboard.
+   */
+  function buildSearch(context, pageBlocks) {
+    const decks = AppSRS.allDecks(context.getData());
+    const results = el("div", { className: "search-results", "aria-live": "polite" });
+    const input = el("input", {
+      type: "search", id: "word-search", autocomplete: "off", spellcheck: "false",
+      enterkeyhint: "search", placeholder: t("review.searchPlaceholder"),
+      "aria-label": t("review.searchLabel"),
+      onInput: function () { lastSearch = input.value; drawResults(); }
+    });
+    input.value = lastSearch;
+
+    /** Redraws the results for the current text (and shows or hides the rest of the page). */
+    function drawResults() {
+      const text = input.value.trim();
+      pageBlocks.forEach(function (block) { if (block) block.hidden = Boolean(text); });
+      results.replaceChildren();
+      if (!text) return;
+
+      const found = searchCards(decks, text);
+      if (!found.length) {
+        results.append(el("p", { className: "muted search-results__count" }, [t("review.searchNone", { text: text })]));
+        return;
+      }
+      const shown = found.slice(0, MAX_SEARCH_RESULTS);
+      const countText = found.length > shown.length
+        ? t("review.searchMore", { shown: shown.length, count: found.length })
+        : (found.length === 1 ? t("review.searchCountOne") : t("review.searchCount", { count: found.length }));
+      results.append(
+        el("p", { className: "muted small search-results__count" }, [countText]),
+        el("ul", { className: "card list" }, shown.map(function (result) { return searchResultRow(result, context); }))
+      );
+    }
+
+    // Draw at once if the learner comes back with text already in the box.
+    drawResults();
+    return el("div", { className: "search-block" }, [el("div", { className: "card field" }, [input]), results]);
+  }
+
   // ===== Start page =====
 
   function startPage(container, context) {
     const parts = AppScreens.parts;
     const data = context.getData();
     const decks = AppSRS.allDecks(data);
-    const session = AppSRS.buildSession(decks, data);
+    const reviewLevel = chosenReviewLevel(data);
+    const session = AppSRS.buildSession(decksForReview(data), data);
 
     const deckRow = function (deck) {
       return el("li", {}, [
@@ -118,40 +283,45 @@
 
     const hasReadingDeck = own.some(function (deck) { return deck.name === t("review.readingDeckName"); });
 
+    // Everything below the search box; hidden while a search is shown.
+    const restOfPage = el("div", { className: "review-start" }, [
+      el("div", { className: "card today-card" }, [
+        el("p", { className: "today-card__title" }, [t("review.todayTitle")]),
+        buildLevelChooser(context),
+        reviewLevel === "all" ? null : el("p", { className: "muted small review-levels__note" }, [t("review.levelOnly", { level: reviewLevel })]),
+        el("p", { className: "muted" }, [
+          session.length ? t("review.todayCount", { count: session.length }) : t("review.nothingToday")
+        ]),
+        session.length ? el("button", {
+          className: "btn btn--block today-card__button",
+          onClick: function () { context.navigate("module/review/session"); }
+        }, [icon("play"), t("review.start")]) : null
+      ]),
+      el("p", { className: "muted small note" }, [t("review.howItWorks", { count: AppSRS.NEW_CARDS_PER_DAY })]),
+    ].concat(
+      // Built-in decks, one list per level (A1, A2, B1); levels without decks are skipped.
+      AppProgress.LEVELS.reduce(function (blocks, level) {
+        const levelDecks = builtIn.filter(function (deck) { return deck.level === level; });
+        if (levelDecks.length) {
+          blocks.push(parts.sectionLabel(t("review.levelDecks", { level: level, count: levelDecks.length })),
+                      el("ul", { className: "card list" }, levelDecks.map(deckRow)));
+        }
+        return blocks;
+      }, [])
+    ).concat([
+      parts.sectionLabel(t("review.myDecks")),
+      own.length ? el("ul", { className: "card list" }, own.map(deckRow)) : null,
+      el("div", { className: "card" + (own.length ? " card--spaced" : "") }, [newDeckForm]),
+      hasReadingDeck ? null : el("button", {
+        className: "btn btn--secondary btn--block",
+        onClick: function () { createDeck(t("review.readingDeckName"), context); }
+      }, [t("review.createReadingDeck")]),
+      el("p", { className: "muted small note" }, [t("review.credits")])
+    ]));
+
     container.append(
       parts.buildHeader(t("review.title"), "home", context),
-      el("section", { className: "content" }, [
-        el("div", { className: "card today-card" }, [
-          el("p", { className: "today-card__title" }, [t("review.todayTitle")]),
-          el("p", { className: "muted" }, [
-            session.length ? t("review.todayCount", { count: session.length }) : t("review.nothingToday")
-          ]),
-          session.length ? el("button", {
-            className: "btn btn--block today-card__button",
-            onClick: function () { context.navigate("module/review/session"); }
-          }, [icon("play"), t("review.start")]) : null
-        ]),
-        el("p", { className: "muted small note" }, [t("review.howItWorks", { count: AppSRS.NEW_CARDS_PER_DAY })]),
-      ].concat(
-        // Built-in decks, one list per level (A1, A2, B1); levels without decks are skipped.
-        AppProgress.LEVELS.reduce(function (blocks, level) {
-          const levelDecks = builtIn.filter(function (deck) { return deck.level === level; });
-          if (levelDecks.length) {
-            blocks.push(parts.sectionLabel(t("review.levelDecks", { level: level, count: levelDecks.length })),
-                        el("ul", { className: "card list" }, levelDecks.map(deckRow)));
-          }
-          return blocks;
-        }, [])
-      ).concat([
-        parts.sectionLabel(t("review.myDecks")),
-        own.length ? el("ul", { className: "card list" }, own.map(deckRow)) : null,
-        el("div", { className: "card" + (own.length ? " card--spaced" : "") }, [newDeckForm]),
-        hasReadingDeck ? null : el("button", {
-          className: "btn btn--secondary btn--block",
-          onClick: function () { createDeck(t("review.readingDeckName"), context); }
-        }, [t("review.createReadingDeck")]),
-        el("p", { className: "muted small note" }, [t("review.credits")])
-      ])),
+      el("section", { className: "content" }, [buildSearch(context, [restOfPage]), restOfPage]),
       parts.buildBottomNav("home", context)
     );
   }
@@ -167,14 +337,18 @@
 
   // ===== One deck =====
 
-  function deckPage(container, context, deck) {
+  /**
+   * One deck. `foundIndex` (optional) is the number of a card to highlight
+   * and scroll to, when the learner arrives from a search result.
+   */
+  function deckPage(container, context, deck, foundIndex) {
     const parts = AppScreens.parts;
     const data = context.getData();
     const stats = AppSRS.deckStats(deck, data);
     const title = deck.title ? deck.title[lang()] : deck.name;
 
     const cardRows = deck.cards.map(function (card, index) {
-      const row = el("li", { className: "phrase-row" }, [
+      const row = el("li", { className: "phrase-row" + (index === foundIndex ? " phrase-row--found" : "") }, [
         card.icon ? picture(card.icon, card.sk, "pic--small", card.icon2) : null,
         el("div", { className: "phrase-row__text" }, [
           el("span", { className: "phrase-row__sk" }, [card.sk]),
@@ -230,6 +404,10 @@
       el("section", { className: "content" }, content),
       parts.buildBottomNav("home", context)
     );
+
+    // Bring the searched card into view (after the page has been laid out).
+    const foundRow = container.querySelector(".phrase-row--found");
+    if (foundRow) requestAnimationFrame(function () { foundRow.scrollIntoView({ block: "center" }); });
   }
 
   /** Form to add a word to an own deck: Slovak, meaning and an optional example. */
@@ -294,7 +472,8 @@
   function sessionPage(container, context, deckId, practiceAll) {
     const parts = AppScreens.parts;
     const data = context.getData();
-    const decks = deckId ? [findDeck(deckId, context)].filter(Boolean) : AppSRS.allDecks(data);
+    // One deck, or (general review) the decks of the level chosen on the start page.
+    const decks = deckId ? [findDeck(deckId, context)].filter(Boolean) : decksForReview(data);
     const queue = practiceAll ? allCardsShuffled(decks) : AppSRS.buildSession(decks, data, Boolean(deckId));
     const backRoute = deckId ? "module/review/deck/" + deckId : "module/review";
 
@@ -409,7 +588,9 @@
     const page = subParts[0];
     if (page === "deck") {
       const deck = findDeck(subParts[1], context);
-      if (deck) { deckPage(container, context, deck); return; }
+      // Optional card number (from a search result); anything else is ignored.
+      const foundIndex = /^\d+$/.test(subParts[2] || "") ? Number(subParts[2]) : -1;
+      if (deck) { deckPage(container, context, deck, foundIndex); return; }
     } else if (page === "session") {
       sessionPage(container, context, subParts[1], subParts[2] === "all");
       return;

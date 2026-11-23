@@ -18,7 +18,7 @@
 
 // ===== Configuration =====
 
-const CACHE_VERSION = "0.6.9"; // keep equal to APP_VERSION in js/main.js
+const CACHE_VERSION = "0.7.0"; // keep equal to APP_VERSION in js/main.js
 const CACHE_NAME = "po-slovensky-" + CACHE_VERSION;
 
 // Every file the app needs to work offline (paths relative to this file).

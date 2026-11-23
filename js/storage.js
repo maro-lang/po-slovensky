@@ -35,7 +35,8 @@
       settings: {
         baseLanguage: null, // "es" or "en"; null means "not chosen yet"
         nickname: "",
-        friends: { groupCode: null } // friends' group (stage 4)
+        friends: { groupCode: null }, // friends' group (stage 4)
+        reviewLevel: "all" // decks used by the general review: "all", "A1", "A2" or "B1"
       },
       progress: {
         totalPoints: 0,
