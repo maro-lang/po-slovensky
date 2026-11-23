@@ -351,7 +351,6 @@
             el("button", { className: "btn btn--secondary", type: "button", onClick: function () { copyText(groupCode); } }, [icon("copy"), t("friends.copy")])
           ])
         ]),
-        el("button", { className: "btn btn--block chat-open", type: "button", onClick: function () { context.navigate("module/friends/chat"); } }, [icon("chat"), t("friends.openChat")]),
         parts.sectionLabel(t("friends.tableTitle")),
         modeHolder,
         el("div", { className: "card--spaced" }, [listHolder]),
@@ -451,19 +450,40 @@
       }
     }, [input, sendButton]);
 
+    // The chat is a tab of the bottom bar, so it has no back arrow;
+    // the writing box sits just above the bar (see .chat__form in the CSS).
     container.append(
-      parts.buildHeader(t("friends.chatTitle"), "module/friends", context),
+      parts.buildHeader(t("friends.chatTitle"), null, context),
       el("section", { className: "content chat" }, [
         el("p", { className: "muted small" }, [t("friends.chatNote")]),
         messageList,
         statusLine
       ]),
-      form
+      form,
+      parts.buildBottomNav("module/friends/chat", context)
     );
 
     load();
     stopChatTimer();
     chatTimer = setInterval(function () { if (!document.hidden) load(); }, CHAT_REFRESH_MS);
+  }
+
+  /**
+   * What the Chat tab shows to someone who is not in a group yet:
+   * the chat belongs to a group, so it points them to the Friends screen.
+   */
+  function chatWithoutGroupPage(container, context) {
+    const parts = AppScreens.parts;
+    container.append(
+      parts.buildHeader(t("friends.chatTitle"), null, context),
+      el("section", { className: "content" }, [
+        el("div", { className: "card field" }, [
+          el("p", {}, [t("friends.chatNeedsGroup")]),
+          el("button", { className: "btn btn--block", type: "button", onClick: function () { context.navigate("module/friends"); } }, [icon("friends"), t("friends.goToFriends")])
+        ])
+      ]),
+      parts.buildBottomNav("module/friends/chat", context)
+    );
   }
 
   // ===== Router for this module =====
@@ -474,6 +494,10 @@
     if (friends && friends.groupCode) {
       if (subParts[0] === "chat") chatPage(container, context);
       else tablePage(container, context);
+      return;
+    }
+    if (subParts[0] === "chat") {
+      chatWithoutGroupPage(container, context);
       return;
     }
     const prefilledCode = subParts[0] === "join" ? AppFriends.normalizeCode(subParts[1]) : "";

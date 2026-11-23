@@ -181,7 +181,6 @@
       "friends.copy": "Copiar",
       "friends.copied": "Copiado.",
       "friends.inviteText": "¡Aprendamos eslovaco juntos! Únete a mi grupo en Ahoj! con el código {code}: {url}",
-      "friends.openChat": "Chat del grupo",
       "friends.tableTitle": "Progreso del grupo",
       "friends.sortProgress": "Progreso",
       "friends.sortTime": "Tiempo semanal",
@@ -200,6 +199,8 @@
       "friends.leaveConfirm": "Toca otra vez para salir",
       "friends.left": "Saliste del grupo.",
       "friends.chatTitle": "Chat del grupo",
+      "friends.chatNeedsGroup": "El chat es de tu grupo de amigos. Primero crea un grupo o únete a uno con un código.",
+      "friends.goToFriends": "Ir a Amigos",
       "friends.chatNote": "Lo ven solo los miembros del grupo. Puedes borrar tus mensajes.",
       "friends.chatEmpty": "Todavía no hay mensajes. ¡Saluda al grupo, si puedes en eslovaco!",
       "friends.chatPlaceholder": "Escribe un mensaje…",
@@ -301,6 +302,7 @@
       "real.other": "Otro",
 
       "nav.home": "Inicio",
+      "nav.chat": "Chat",
       "nav.friends": "Amigos",
       "nav.settings": "Ajustes"
     },
@@ -466,7 +468,6 @@
       "friends.copy": "Copy",
       "friends.copied": "Copied.",
       "friends.inviteText": "Let's learn Slovak together! Join my group in Ahoj! with the code {code}: {url}",
-      "friends.openChat": "Group chat",
       "friends.tableTitle": "Group progress",
       "friends.sortProgress": "Progress",
       "friends.sortTime": "Weekly time",
@@ -485,6 +486,8 @@
       "friends.leaveConfirm": "Tap again to leave",
       "friends.left": "You left the group.",
       "friends.chatTitle": "Group chat",
+      "friends.chatNeedsGroup": "The chat belongs to your group of friends. First create a group or join one with a code.",
+      "friends.goToFriends": "Go to Friends",
       "friends.chatNote": "Only group members see it. You can delete your own messages.",
       "friends.chatEmpty": "No messages yet. Say hello to the group, in Slovak if you can!",
       "friends.chatPlaceholder": "Write a message…",
@@ -586,6 +589,7 @@
       "real.other": "Them",
 
       "nav.home": "Home",
+      "nav.chat": "Chat",
       "nav.friends": "Friends",
       "nav.settings": "Settings"
     }

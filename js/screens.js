@@ -47,11 +47,12 @@
 
   /**
    * Bottom navigation bar shared by the main screens:
-   * Home | Friends | Settings. activeRoute is the item to highlight.
+   * Home | Chat | Friends | Settings. activeRoute is the item to highlight.
    */
   function buildBottomNav(activeRoute, context) {
     const items = [
       { route: "home", label: t("nav.home"), iconName: "home" },
+      { route: "module/friends/chat", label: t("nav.chat"), iconName: "chat" },
       { route: "module/friends", label: t("nav.friends"), iconName: "friends" },
       { route: "settings", label: t("nav.settings"), iconName: "settings" }
     ];

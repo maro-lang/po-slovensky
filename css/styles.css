@@ -741,10 +741,9 @@ input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1p
 .player__name { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
 .player--me .player__name { color: var(--accent); }
 .player__facts { margin-top: 8px; }
-.chat-open { margin-top: 12px; }
 
 /* Chat: bubbles, own messages on the right; writing box fixed at the bottom. */
-.chat { padding-bottom: 96px; }
+.chat { padding-bottom: 80px; } /* room for the writing box, which sits above the bottom bar */
 .chat__messages { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 .chat__empty { text-align: center; padding: 24px 0; }
 .chat__bubble {
@@ -766,10 +765,10 @@ input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1p
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); /* just above the bottom bar */
   display: flex;
   gap: 8px;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  padding: 10px 12px;
   background: var(--surface);
   border-top: 1px solid var(--border);
 }
