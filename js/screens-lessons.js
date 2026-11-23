@@ -1,0 +1,176 @@
+/*
+ * screens-lessons.js — Guided lessons (module "lessons").
+ *
+ * Addresses (after #/module/lessons):
+ *   (nothing)              -> list of units by level
+ *   <unitId>               -> one unit: phrases with audio, grammar, tip
+ *   <unitId>/practice      -> the unit's exercises (quiz)
+ *
+ * Exercise types (see data/lessons-a1.js): "meaning", "say", "fill", "listen".
+ *
+ * Depends on: data/lessons-a1.js (AppData.lessons), ui.js, i18n.js,
+ * speech.js, screens.js (AppScreens.parts) and quiz.js (AppQuiz).
+ */
+
+(function () {
+  "use strict";
+
+  const el = AppUI.el;
+  const icon = AppUI.icon;
+  const t = AppText.t;
+
+  function lang() { return AppText.getLanguage(); }
+
+  function findUnit(unitId) {
+    return AppData.lessons.UNITS.find(function (unit) { return unit.id === unitId; });
+  }
+
+  // ===== Unit list =====
+
+  function listPage(container, context) {
+    const parts = AppScreens.parts;
+
+    const rows = AppData.lessons.UNITS.map(function (unit) {
+      const best = context.getBestResult("lesson-" + unit.id);
+      const subtitle = unit.title[lang()] + (best ? " · " + t("common.bestScore", { correct: best.correct, total: best.total }) : "");
+      return el("li", {}, [
+        el("button", { className: "list-row", "data-unit": unit.id, onClick: function () { context.navigate("module/lessons/" + unit.id); } }, [
+          el("span", { className: "chip" + (best ? " chip--done" : "") }, [String(unit.number)]),
+          el("span", { className: "list-row__text" }, [
+            el("span", { className: "list-row__title" }, [unit.title.sk]),
+            el("span", { className: "list-row__subtitle" }, [subtitle])
+          ]),
+          el("span", { className: "list-row__chevron" }, [icon("chevronRight")])
+        ])
+      ]);
+    });
+
+    container.append(
+      parts.buildHeader(t("lessons.title"), "home", context),
+      el("section", { className: "content" }, [
+        parts.sectionLabel(t("lessons.levelA1")),
+        el("ul", { className: "card list" }, rows),
+        el("p", { className: "muted small note" }, [t("lessons.comingLevels")])
+      ]),
+      parts.buildBottomNav("home", context)
+    );
+  }
+
+  // ===== One unit =====
+
+  function unitPage(container, context, unit) {
+    const parts = AppScreens.parts;
+
+    const phraseRows = unit.phrases.map(function (phrase) {
+      return el("li", {}, [
+        el("button", { className: "phrase-row phrase-row--button", type: "button", onClick: function () { AppSpeech.speak(phrase.sk); } }, [
+          el("span", { className: "phrase-row__text" }, [
+            el("span", { className: "phrase-row__sk" }, [phrase.sk]),
+            el("span", { className: "muted small" }, [phrase[lang()]])
+          ]),
+          el("span", { className: "speak-btn", "aria-hidden": "true" }, [icon("speaker")])
+        ])
+      ]);
+    });
+
+    const content = [
+      el("p", { className: "muted" }, [unit.intro[lang()]]),
+      parts.sectionLabel(t("lessons.phrases")),
+      el("ul", { className: "card list" }, phraseRows)
+    ];
+
+    if (unit.grammar) {
+      content.push(
+        parts.sectionLabel(unit.grammar.title[lang()]),
+        el("div", { className: "card" }, [el("table", { className: "table" }, [
+          el("tbody", {}, unit.grammar.rows.map(function (row) {
+            return el("tr", {}, [
+              el("td", { className: "sk-cell" }, [row.sk]),
+              el("td", { className: "muted" }, [row[lang()]])
+            ]);
+          }))
+        ])])
+      );
+    }
+
+    if (unit.note) {
+      content.push(parts.sectionLabel(t("lessons.tip")), el("div", { className: "card field" }, [el("p", {}, [unit.note[lang()]])]));
+    }
+
+    content.push(el("button", {
+      className: "btn btn--block",
+      onClick: function () { context.navigate("module/lessons/" + unit.id + "/practice"); }
+    }, [icon("play"), t("lessons.practice")]));
+
+    container.append(
+      parts.buildHeader(t("lessons.unit", { n: unit.number }) + " · " + unit.title.sk, "module/lessons", context),
+      el("section", { className: "content" }, content),
+      parts.buildBottomNav("home", context)
+    );
+  }
+
+  // ===== Practice =====
+
+  /** Converts the unit's exercises into quiz questions. */
+  function buildQuestions(unit) {
+    return unit.exercises.map(function (exercise) {
+      if (exercise.type === "meaning") {
+        return {
+          prompt: t("lessons.whatMeans"),
+          skText: exercise.sk,
+          options: exercise.options[lang()],
+          answerIndex: exercise.answer
+        };
+      }
+      if (exercise.type === "listen") {
+        return {
+          prompt: t("lessons.listenChoose"),
+          audioText: exercise.sk,
+          options: exercise.options,
+          answerIndex: exercise.answer,
+          afterAnswer: { sk: exercise.sk, text: exercise.options[exercise.answer] }
+        };
+      }
+      if (exercise.type === "fill") {
+        const solved = exercise.sk.replace("___", exercise.options[exercise.answer]);
+        return {
+          prompt: t("lessons.complete"),
+          skText: exercise.sk,
+          options: exercise.options,
+          answerIndex: exercise.answer,
+          slovakOptions: true,
+          afterAnswer: { sk: solved, text: "" }
+        };
+      }
+      // "say": a prompt in the base language, Slovak options.
+      return {
+        prompt: exercise.prompt[lang()],
+        options: exercise.options,
+        answerIndex: exercise.answer,
+        slovakOptions: true,
+        afterAnswer: { sk: exercise.options[exercise.answer], text: "" }
+      };
+    });
+  }
+
+  // ===== Router for this module =====
+
+  function route(container, context, subParts) {
+    const unit = findUnit(subParts[0]);
+    if (!unit) { listPage(container, context); return; }
+
+    if (subParts[1] === "practice") {
+      AppQuiz.start(container, context, {
+        title: unit.title.sk,
+        backRoute: "module/lessons/" + unit.id,
+        resultKey: "lesson-" + unit.id,
+        questions: buildQuestions(unit)
+      });
+    } else {
+      unitPage(container, context, unit);
+    }
+  }
+
+  window.AppModuleScreens = window.AppModuleScreens || {};
+  window.AppModuleScreens.lessons = route;
+})();

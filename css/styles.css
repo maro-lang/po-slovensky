@@ -133,18 +133,12 @@ p { margin: 0; }
   cursor: pointer;
 }
 
-/* Small square logo with "Č", also used on the first screen in a bigger size. */
+/* The app icon («ahoj») used as a small logo; bigger on the first screen. */
 .brand-mark {
+  display: block;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
-  background: var(--accent);
-  color: var(--accent-text);
-  font-weight: 700;
-  font-size: 1.05rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 8px;
   flex: none;
 }
 
@@ -298,7 +292,7 @@ input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1p
 /* ===== 7. Onboarding ===== */
 
 .onboarding { padding: 64px 20px 32px; }
-.onboarding .brand-mark { width: 64px; height: 64px; border-radius: 18px; font-size: 2rem; margin-bottom: 24px; }
+.onboarding .brand-mark { width: 72px; height: 72px; border-radius: 17px; margin-bottom: 24px; }
 .onboarding__title { font-size: 1.75rem; font-weight: 700; }
 .onboarding__tagline { margin-top: 4px; }
 .onboarding__question { margin-top: 32px; font-weight: 500; }
@@ -355,3 +349,168 @@ input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1p
 
 /* The first group label on a screen needs less space above it. */
 .content > .section-label:first-child { margin-top: 4px; }
+
+/* ===== 11. Case colours (stage 2) =====
+ * One colour per case, the same everywhere in the app. The nominative
+ * (dictionary form) is neutral grey; the other five have strong colours.
+ * --c = strong colour (text, borders), --c-soft = tinted background. */
+
+.case-nom { --c: #475467; --c-soft: #eef0f3; }
+.case-gen { --c: #6d3fc9; --c-soft: #f1ecfd; }
+.case-dat { --c: #0b7a5e; --c-soft: #e3f5ee; }
+.case-acc { --c: #b45309; --c-soft: #fdf1df; }
+.case-loc { --c: #c2410c; --c-soft: #fdece4; }
+.case-ins { --c: #1d4ed8; --c-soft: #e8eefd; }
+.case-text-nom { color: #475467; }
+.case-text-gen { color: #6d3fc9; }
+.case-text-dat { color: #0b7a5e; }
+.case-text-acc { color: #b45309; }
+.case-text-loc { color: #c2410c; }
+.case-text-ins { color: #1d4ed8; }
+
+@media (prefers-color-scheme: dark) {
+  .case-nom { --c: #b6bfcc; --c-soft: #232831; }
+  .case-gen { --c: #b9a1f5; --c-soft: #2a2241; }
+  .case-dat { --c: #6fd3b0; --c-soft: #10302a; }
+  .case-acc { --c: #f2b45d; --c-soft: #35270f; }
+  .case-loc { --c: #f59a72; --c-soft: #3a2015; }
+  .case-ins { --c: #8eaaff; --c-soft: #1c2645; }
+  .case-text-nom { color: #b6bfcc; }
+  .case-text-gen { color: #b9a1f5; }
+  .case-text-dat { color: #6fd3b0; }
+  .case-text-acc { color: #f2b45d; }
+  .case-text-loc { color: #f59a72; }
+  .case-text-ins { color: #8eaaff; }
+}
+
+/* Square with the case number, in the case colour. */
+.case-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--c-soft);
+  color: var(--c);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.case-badge--large { width: 56px; height: 56px; border-radius: 16px; font-size: 1.4rem; background: var(--surface); }
+.table .case-badge { width: 28px; height: 28px; border-radius: 8px; font-size: 0.85rem; }
+
+/* Top block of a case page: tinted with the case colour. */
+.case-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: var(--radius-card);
+  background: var(--c-soft);
+  color: var(--c);
+}
+.case-hero__sk { font-size: 1.3rem; font-weight: 700; }
+.case-hero__questions { font-weight: 500; opacity: 0.9; }
+
+.ending { font-weight: 700; }
+.form { font-size: 1rem; }
+
+/* ===== 12. Tables, phrases and notices (stage 2) ===== */
+
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 10px 16px; text-align: left; border-top: 1px solid var(--border); vertical-align: middle; }
+.table tr:first-child th, .table tr:first-child td { border-top: none; }
+.table thead th { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+.table tbody tr:first-child th, .table tbody tr:first-child td { border-top: 1px solid var(--border); }
+.table:not(:has(thead)) tbody tr:first-child td { border-top: none; }
+.table-card { overflow-x: auto; }
+.table--model th, .table--model td { padding: 10px 12px; }
+.table-case { display: flex; align-items: center; gap: 8px; font-weight: 400; color: var(--text-muted); }
+.sk-cell { font-weight: 600; }
+
+.prep-row { display: flex; align-items: baseline; gap: 12px; padding: 12px 16px; }
+.prep-row__sk { font-weight: 700; min-width: 72px; }
+
+/* A Slovak phrase with its translation and a speaker button. */
+.phrase-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; width: 100%; }
+.phrase-row--button { border: none; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.phrase-row--button:active { background: var(--surface-muted); }
+.phrase-row__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.phrase-row__sk { font-weight: 600; font-size: 1.05rem; }
+
+.speak-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  cursor: pointer;
+}
+.speak-btn .icon { width: 20px; height: 20px; }
+
+.list--inset { border-top: 1px solid var(--border); }
+.rule { line-height: 1.55; }
+.note { margin-top: 12px; padding: 0 4px; }
+.center { text-align: center; margin-top: 8px; }
+.chip--word { font-size: 0.8rem; }
+.chip--done { background: var(--accent); color: var(--accent-text); }
+
+.btn--block { width: 100%; margin-top: 24px; padding: 14px 16px; }
+
+/* Warning about the missing Slovak voice. */
+.notice {
+  background: #fff6e0;
+  color: #7a4b00;
+  border: 1px solid #f3d68e;
+  border-radius: var(--radius-control);
+  padding: 12px 14px;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  .notice { background: #33270c; color: #f3d68e; border-color: #5a4515; }
+}
+
+/* ===== 13. Exercises (quiz) ===== */
+
+.quiz__progress { height: 6px; border-radius: 3px; background: var(--surface-muted); overflow: hidden; margin-bottom: 8px; }
+.quiz__progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+.quiz__prompt { padding: 18px 16px; margin-top: 8px; }
+.quiz__listen { margin-top: 12px; }
+.sk-text { font-size: 1.4rem; font-weight: 700; margin-top: 8px; line-height: 1.35; }
+
+.quiz__options { display: grid; gap: 10px; margin-top: 16px; }
+.option {
+  padding: 14px 16px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.option--sk { font-weight: 600; font-size: 1.05rem; }
+.option:disabled { cursor: default; }
+.option--correct { border-color: #16a34a; background: #e9f8ee; color: #14532d; }
+.option--wrong { border-color: #dc2626; background: #fdecec; color: #7f1d1d; }
+@media (prefers-color-scheme: dark) {
+  .option--correct { background: #0f2e1b; color: #a7f3c0; }
+  .option--wrong { background: #3a1414; color: #fecaca; }
+}
+
+.quiz__explanation { margin-top: 16px; padding: 16px; }
+.quiz__explanation.is-right { border-color: #16a34a; }
+.quiz__explanation.is-wrong { border-color: #dc2626; }
+.quiz__explanation .phrase-row { padding: 10px 0 0; }
+.quiz__verdict { font-weight: 700; }
+.quiz__next { width: 100%; margin-top: 14px; }
+
+.quiz__result { padding: 24px 16px; text-align: center; }
+.quiz__score { font-size: 1.5rem; font-weight: 700; }
+.quiz__points { color: var(--accent); font-weight: 600; margin: 6px 0 20px; }

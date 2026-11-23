@@ -15,7 +15,7 @@
 
 // ===== Configuration =====
 
-const CACHE_VERSION = "0.1.2"; // keep equal to APP_VERSION in js/main.js
+const CACHE_VERSION = "0.2.0"; // keep equal to APP_VERSION in js/main.js
 const CACHE_NAME = "po-slovensky-" + CACHE_VERSION;
 
 // Every file the app needs to work offline (paths relative to this file).
@@ -26,9 +26,17 @@ const APP_FILES = [
   "css/styles.css",
   "js/storage.js",
   "js/i18n.js",
+  "js/speech.js",
   "js/modules-list.js",
   "js/ui.js",
+  "js/data/cases.js",
+  "js/data/pronunciation.js",
+  "js/data/lessons-a1.js",
   "js/screens.js",
+  "js/quiz.js",
+  "js/screens-cases.js",
+  "js/screens-pronunciation.js",
+  "js/screens-lessons.js",
   "js/main.js",
   "icons/icon-192.png",
   "icons/icon-512.png",

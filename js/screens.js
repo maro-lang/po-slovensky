@@ -4,7 +4,9 @@
  * Screens:
  *   onboarding -> first launch: choose Spanish or English as base language
  *   home       -> greeting, points, streak and the list of modules
- *   module     -> one module (for now, a "coming in stage N" page)
+ *   module     -> one module: built modules are drawn by their own file
+ *                 (screens-cases.js, screens-lessons.js…, registered in
+ *                 AppModuleScreens); the rest show "coming in stage N"
  *   settings   -> language, nickname, progress backup, version
  *
  * How to use: main.js calls AppScreens.<name>(container, context), where
@@ -32,7 +34,7 @@
           "aria-label": t("common.back"),
           onClick: function () { context.navigate(backTarget); }
         }, [icon("back")])
-      : el("div", { className: "brand-mark", "aria-hidden": "true" }, ["Č"]);
+      : el("img", { className: "brand-mark", src: "icons/icon-192.png", alt: "" });
 
     return el("header", { className: "header" }, [
       leftPart,
@@ -85,7 +87,7 @@
 
     container.append(
       el("section", { className: "onboarding" }, [
-        el("div", { className: "brand-mark", "aria-hidden": "true" }, ["Č"]),
+        el("img", { className: "brand-mark", src: "icons/icon-192.png", alt: "" }),
         el("h1", { className: "onboarding__title" }, [t("app.name")]),
         // Nothing is chosen yet, so the texts are shown in both languages.
         el("p", { className: "onboarding__tagline muted" }, [AppText.tIn("es", "app.tagline") + " · " + AppText.tIn("en", "app.tagline")]),
@@ -138,7 +140,7 @@
         el("span", { className: "stat__label" }, [t("home.points")])
       ]),
       el("div", { className: "stat" }, [
-        el("span", { className: "stat__value" }, [String(data.progress.streakDays)]),
+        el("span", { className: "stat__value" }, [String(context.getStreak())]),
         el("span", { className: "stat__label" }, [t("home.streak") + " (" + t("home.days") + ")"])
       ])
     ]);
@@ -162,11 +164,21 @@
 
   // ===== Module screen =====
 
-  /** Page for one module. Modules not built yet show which stage brings them. */
-  function module(container, context, moduleId) {
+  /**
+   * Page for one module. A module that is ready hands over to its own
+   * screen file; the others show which stage brings them.
+   * `subParts` is the rest of the address, e.g. ["case", "gen"].
+   */
+  function module(container, context, moduleId, subParts) {
     const moduleInfo = AppModules.findById(moduleId);
     if (!moduleInfo) {
       context.navigate("home"); // unknown address: go back home
+      return;
+    }
+
+    const moduleScreen = window.AppModuleScreens && window.AppModuleScreens[moduleId];
+    if (moduleInfo.ready && moduleScreen) {
+      moduleScreen(container, context, subParts || []);
       return;
     }
 
@@ -286,6 +298,12 @@
     onboarding: onboarding,
     home: home,
     module: module,
-    settings: settings
+    settings: settings,
+    // Shared pieces, used by the module screen files.
+    parts: {
+      buildHeader: buildHeader,
+      buildBottomNav: buildBottomNav,
+      sectionLabel: sectionLabel
+    }
   };
 })();

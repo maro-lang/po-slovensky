@@ -68,7 +68,10 @@
     back: [["path", "M15 6l-6 6 6 6"]],
     download: [["path", "M12 4v11M7.5 10.5 12 15l4.5-4.5M5 20h14"]],
     upload: [["path", "M12 20V9M7.5 13.5 12 9l4.5 4.5M5 4h14"]],
-    clock: [["circle", 12, 12, 8], ["path", "M12 8v4l2.5 2.5"]]
+    clock: [["circle", 12, 12, 8], ["path", "M12 8v4l2.5 2.5"]],
+    speaker: [["path", "M4 9.5h3.5L12 6v12l-4.5-3.5H4z"], ["path", "M15.5 9.5a3.5 3.5 0 0 1 0 5M18 7a7 7 0 0 1 0 10"]],
+    table: [["path", "M4 5h16v14H4zM4 10h16M4 15h16M10 5v14"]],
+    play: [["path", "M8 5.5v13l10-6.5z"]]
   };
 
   const SVG_NAMESPACE = "http://www.w3.org/2000/svg";

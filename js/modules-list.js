@@ -9,7 +9,7 @@
  *   title / description -> texts in Spanish (es) and English (en)
  *
  * Depends on: nothing. When a module is built, its `stage` stays as a
- * record and `ready` becomes true.
+ * record and `ready` becomes true (stage 2: lessons, cases, pronunciation).
  *
  * The stages follow the plan in caracteristicas-v1.md (one folder up).
  */
@@ -23,7 +23,7 @@
       symbol: "A1",
       colorKey: "blue",
       stage: 2,
-      ready: false,
+      ready: true,
       title: { es: "Lecciones guiadas", en: "Guided lessons" },
       description: { es: "Unidades por nivel, de A1 a B1", en: "Units by level, from A1 to B1" }
     },
@@ -32,7 +32,7 @@
       symbol: "Pád",
       colorKey: "purple",
       stage: 2,
-      ready: false,
+      ready: true,
       title: { es: "Taller de casos", en: "Case workshop" },
       description: { es: "Los 6 casos, uno por vez", en: "The 6 cases, one at a time" }
     },
@@ -41,7 +41,7 @@
       symbol: "ä",
       colorKey: "teal",
       stage: 2,
-      ready: false,
+      ready: true,
       title: { es: "Pronunciación", en: "Pronunciation" },
       description: { es: "Audio y diacríticos", en: "Audio and diacritics" }
     },

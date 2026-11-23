@@ -39,7 +39,8 @@
       progress: {
         totalPoints: 0,
         streakDays: 0,
-        lastStudyDate: null // "YYYY-MM-DD" of the last day with study
+        lastStudyDate: null, // "YYYY-MM-DD" of the last day with study
+        results: {} // best score per exercise, e.g. { "cases-gen": { correct: 4, total: 5 } }
       }
     };
   }
